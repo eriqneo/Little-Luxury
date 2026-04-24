@@ -1,0 +1,664 @@
+import React, { useState, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
+import { 
+  Check, 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  Minus, 
+  Calendar as CalendarIcon,
+  Users,
+  CreditCard,
+  Building,
+  Wifi,
+  Coffee,
+  ShieldCheck,
+  Phone
+} from "lucide-react";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
+import FadeIn from "./FadeIn";
+import { useRooms } from "../hooks/useRooms";
+import { useReservations } from "../hooks/useReservations";
+import { useSiteSettings } from "../hooks/useSiteSettings";
+import { getFileUrl, pb } from "../lib/pocketbase";
+
+// --- Types & Constants ---
+type Step = 1 | 2 | 3;
+
+// Helper: convert a day number to ISO date string for the CURRENT month
+function dayToISO(day: number): string {
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth(), day);
+  return d.toISOString().split('T')[0];
+}
+
+// --- Sub-components ---
+
+const StepIndicator = ({ currentStep }: { currentStep: Step }) => {
+  const steps = [
+    { num: 1, label: "Choose Dates" },
+    { num: 2, label: "Select Room" },
+    { num: 3, label: "Your Details" },
+  ];
+
+  return (
+    <div className="flex items-center justify-center w-full max-w-4xl mx-auto mb-20 px-6">
+      {steps.map((s, i) => (
+        <React.Fragment key={s.num}>
+          <div className="flex flex-col items-center relative z-10">
+            <div 
+              className={`w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-body transition-all duration-500 border ${
+                currentStep > s.num 
+                  ? "bg-gold border-gold text-ivory" 
+                  : currentStep === s.num 
+                  ? "bg-gold border-gold text-ivory scale-110" 
+                  : "bg-transparent border-gold/30 text-gold/50"
+              }`}
+            >
+              {currentStep > s.num ? <Check size={16} /> : s.num}
+            </div>
+            <span className={`absolute top-full mt-3 text-[10px] uppercase tracking-[0.2em] font-body whitespace-nowrap transition-colors duration-500 ${
+              currentStep >= s.num ? "text-gold" : "text-gold/40"
+            }`}>
+              {s.label}
+            </span>
+          </div>
+          {i < steps.length - 1 && (
+            <div className="flex-1 h-[1px] bg-gold/20 mx-4" />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
+
+// --- Page Component ---
+
+export default function BookingPage() {
+  const { rooms, loading: roomsLoading } = useRooms();
+  const { reservations, loading: reservationsLoading } = useReservations(); // live from CMS
+  const { settings, loading: settingsLoading } = useSiteSettings();
+  const [step, setStep] = useState<Step>(1);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [bookingRef, setBookingRef] = useState('');
+  
+  // Selection State
+  const [range, setRange] = useState<{ start: number | null; end: number | null }>({ start: null, end: null });
+  const [guests, setGuests] = useState({ adults: 2, children: 0 });
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    firstName: "", lastName: "", email: "", phone: "", nationality: "Kenyan", 
+    arrivalTime: "14:00", requests: "", payment: "hotel", agreed: false
+  });
+
+  const selectedRoom = useMemo(() => rooms.find(r => r.id === selectedRoomId), [rooms, selectedRoomId]);
+  const nights = (range.start && range.end) ? Math.max(1, range.end - range.start) : 0;
+  const subtotal = selectedRoom ? selectedRoom.price * nights : 0;
+  const vat = subtotal * 0.16;
+  const total = subtotal + vat;
+
+  // Build set of booked day numbers from live CMS reservations (Confirmed/Booked/Maintenance)
+  const bookedDays = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth(); // 0-indexed
+    const days = new Set<number>();
+    reservations.forEach(r => {
+      if (r.status === 'Booked' || r.status === 'Maintenance' || r.status === 'Closed') {
+        const start = new Date(r.check_in);
+        const end = new Date(r.check_out);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          if (d.getFullYear() === year && d.getMonth() === month) {
+            days.add(d.getDate());
+          }
+        }
+      }
+    });
+    return days;
+  }, [reservations]);
+
+  // Submit booking to PocketBase as a Pending reservation
+  const handleSubmit = async () => {
+    if (!form.agreed || !form.email || !form.firstName || !selectedRoomId || !range.start || !range.end) return;
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      const record = await pb.collection('reservations').create({
+        guest_name: `${form.firstName} ${form.lastName}`.trim(),
+        guest_email: form.email,
+        guest_phone: form.phone,
+        room: selectedRoomId,
+        check_in: dayToISO(range.start),
+        check_out: dayToISO(range.end),
+        guests_adults: guests.adults,
+        guests_children: guests.children,
+        arrival_time: form.arrivalTime,
+        special_requests: form.requests,
+        payment_method: form.payment,
+        nationality: form.nationality,
+        total_amount: total,
+        status: 'Pending',  // Admin will change to Booked to block the calendar
+        notes: '',
+      });
+      setBookingRef(`LL-${record.id.slice(-6).toUpperCase()}`);
+      setIsSuccess(true);
+    } catch (err: any) {
+      console.error('Booking failed:', err);
+      setSubmitError('Something went wrong. Please try again or call us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Calendar Logic
+  const months = ["April", "May"];
+  const daysInMonth = 30;
+
+  const handleDateClick = (day: number) => {
+    if (bookedDays.has(day)) return; // blocked by CMS
+    if (!range.start || (range.start && range.end)) {
+      setRange({ start: day, end: null });
+    } else {
+      if (day < range.start) {
+        setRange({ start: day, end: range.start });
+      } else {
+        setRange({ ...range, end: day });
+      }
+    }
+  };
+
+  const isSelected = (day: number) => {
+    if (range.start === day || range.end === day) return true;
+    if (range.start && range.end && day > range.start && day < range.end) return true;
+    return false;
+  };
+
+  const nextStep = () => {
+    if (step === 1 && (!range.start || !range.end)) return;
+    if (step === 2 && !selectedRoomId) return;
+    setStep((prev) => (prev + 1) as Step);
+    window.scrollTo({ top: 300, behavior: "smooth" });
+  };
+
+  if (roomsLoading || settingsLoading || reservationsLoading) {
+    return (
+      <div className="min-h-screen bg-ivory flex items-center justify-center">
+        <div className="text-gold text-sm uppercase tracking-[0.4em] animate-pulse">Consulting the Records...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-ivory">
+      <Navbar />
+      
+      {/* Hero */}
+      <section className="relative h-[40vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: `url("${settings?.booking_hero ? getFileUrl(settings, settings.booking_hero, '1920x1080') : 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=1920&q=80'}")` 
+          }}
+        >
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
+        <div className="relative z-10 text-center px-6">
+          <FadeIn direction="up">
+            <span className="text-gold text-[11px] uppercase tracking-[0.4em] font-body block mb-4">RESERVATIONS</span>
+            <h1 className="text-white text-5xl md:text-[60px] font-display italic font-light">Reserve Your Room</h1>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Main Flow */}
+      <section className="py-24 px-6 relative z-0">
+        <StepIndicator currentStep={step} />
+
+        <div className="container mx-auto max-w-[1200px]">
+          <AnimatePresence mode="wait">
+            {/* STEP 1 */}
+            {step === 1 && (
+              <motion.div 
+                key="step1"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-white p-8 md:p-16 shadow-sm border border-gold/5"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                  {/* Calendar Widget */}
+                  <div>
+                    <h3 className="text-charcoal text-2xl font-display italic mb-10">Select Your Dates</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                      {months.map((m, mIdx) => (
+                        <div key={m}>
+                          <div className="flex items-center justify-between mb-8">
+                            <h4 className="font-display text-xl">{m} 2026</h4>
+                          </div>
+                          <div className="grid grid-cols-7 gap-y-2 text-center text-[13px] font-body text-charcoal/40 mb-4">
+                            {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => <span key={i}>{d}</span>)}
+                          </div>
+                          <div className="grid grid-cols-7 gap-1">
+                            {Array.from({ length: daysInMonth }).map((_, i) => {
+                              const day = i + 1;
+                              const unavailable = bookedDays.has(day) && mIdx === 0;
+                              const selected = isSelected(day) && mIdx === 0;
+                              return (
+                                <button
+                                  key={i}
+                                  onClick={() => mIdx === 0 && handleDateClick(day)}
+                                  className={`h-10 w-full flex items-center justify-center font-body text-[13px] transition-all relative
+                                    ${unavailable ? "text-charcoal/20 line-through cursor-default" : "text-charcoal hover:bg-gold/10"}
+                                    ${selected ? "bg-gold text-white hover:bg-gold" : ""}
+                                    ${range.start === day && mIdx === 0 ? "rounded-l-full" : ""}
+                                    ${range.end === day && mIdx === 0 ? "rounded-r-full" : ""}
+                                    ${day === 10 && mIdx === 0 && !selected ? "underline decoration-gold underline-offset-4 font-semibold" : ""}
+                                  `}
+                                >
+                                  {day}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Guests & Promo */}
+                  <div className="flex flex-col justify-center">
+                    <div className="space-y-12 max-w-sm mx-auto w-full">
+                      <div className="space-y-8">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-charcoal font-display text-lg mb-1">Adults</p>
+                            <p className="text-charcoal/40 text-[11px] uppercase tracking-wider uppercase">Age 12+</p>
+                          </div>
+                          <div className="flex items-center gap-6">
+                            <button onClick={() => setGuests({...guests, adults: Math.max(1, guests.adults - 1)})} className="text-gold"><Minus size={18} /></button>
+                            <span className="text-xl font-display tabular-nums w-4 text-center">{guests.adults}</span>
+                            <button onClick={() => setGuests({...guests, adults: guests.adults + 1})} className="text-gold"><Plus size={18} /></button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-charcoal font-display text-lg mb-1">Children</p>
+                            <p className="text-charcoal/40 text-[11px] uppercase tracking-wider uppercase">Age 0-11</p>
+                          </div>
+                          <div className="flex items-center gap-6">
+                            <button onClick={() => setGuests({...guests, children: Math.max(0, guests.children - 1)})} className="text-gold"><Minus size={18} /></button>
+                            <span className="text-xl font-display tabular-nums w-4 text-center">{guests.children}</span>
+                            <button onClick={() => setGuests({...guests, children: guests.children + 1})} className="text-gold"><Plus size={18} /></button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          placeholder="PROMO CODE"
+                          className="w-full bg-transparent border-b border-gold/30 py-3 text-[12px] uppercase tracking-[0.2em] font-body outline-none focus:border-gold pr-16"
+                        />
+                        <button className="absolute right-0 top-1/2 -translate-y-1/2 text-gold text-[11px] uppercase font-body font-semibold">Apply</button>
+                      </div>
+
+                      <button 
+                        onClick={nextStep}
+                        disabled={!range.start || !range.end}
+                        className={`w-full py-5 text-[13px] uppercase tracking-[0.2em] font-body transition-all duration-500
+                          ${range.start && range.end ? "bg-gold text-ivory hover:bg-gold-mid shadow-xl" : "bg-gold-muted/30 text-gold-muted cursor-not-allowed"}
+                        `}
+                      >
+                        Check Availability →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* STEP 2 */}
+            {step === 2 && (
+              <motion.div 
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="grid grid-cols-1 lg:grid-cols-3 gap-12"
+              >
+                <div className="lg:col-span-2 space-y-8">
+                  {loading ? (
+                    <div className="text-gold text-sm uppercase tracking-widest animate-pulse py-20 text-center">Loading Rooms...</div>
+                  ) : rooms.map((room) => (
+                    <div 
+                      key={room.id}
+                      onClick={() => setSelectedRoomId(room.id)}
+                      className={`flex flex-col md:flex-row bg-white overflow-hidden cursor-pointer group transition-all duration-500 border-2 
+                        ${selectedRoomId === room.id ? "border-gold" : "border-transparent hover:border-gold/30"}
+                      `}
+                    >
+                      <div className="md:w-2/5 relative h-64 md:h-auto overflow-hidden">
+                        <img src={getFileUrl(room, room.image, '600x400')} alt={room.name} className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" referrerPolicy="no-referrer" />
+                        {selectedRoomId === room.id && (
+                          <div className="absolute top-4 left-4 bg-gold text-ivory text-[10px] uppercase font-body px-3 py-1 tracking-widest flex items-center gap-1.5 shadow-lg">
+                            <Check size={10} /> Selected
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-8 md:p-10 flex-1 flex flex-col justify-between">
+                        <div>
+                          <span className="text-gold text-[10px] uppercase tracking-[0.3em] font-body mb-2 block">{room.type_label}</span>
+                          <h3 className="text-2xl font-display mb-4">{room.name}</h3>
+                          <div className="flex flex-wrap gap-x-6 gap-y-3 mb-6">
+                            {room.amenities?.slice(0, 4).map(f => (
+                              <span key={f} className="text-charcoal/50 text-[12px] font-body flex items-center gap-2 whitespace-nowrap">
+                                <span className="w-1 h-1 rounded-full bg-gold/50" /> {f}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-end justify-between border-t border-gold/10 pt-6">
+                          <div>
+                            <p className="text-charcoal/40 text-[10px] uppercase font-body mb-1">Price per night</p>
+                            <p className="text-2xl font-display text-gold italic">KSh {room.price.toLocaleString()}</p>
+                          </div>
+                          <button 
+                            className={`px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-body transition-all duration-300
+                              ${selectedRoomId === room.id ? "bg-gold text-white" : "border border-gold text-gold hover:bg-gold hover:text-white"}
+                            `}
+                          >
+                            {selectedRoomId === room.id ? "Selected ✓" : "Select"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Sidebar Summary */}
+                <div className="lg:col-span-1">
+                  <div className="bg-espresso p-8 sticky top-32">
+                    <h4 className="text-gold text-[11px] uppercase tracking-[0.3em] font-body font-medium mb-8">Reservation Info</h4>
+                    <div className="space-y-6 mb-10">
+                      <div className="flex justify-between border-b border-gold/10 pb-4">
+                        <span className="text-ivory/60 text-[13px] font-body">Check-in</span>
+                        <span className="text-ivory text-[13px] font-body">April {range.start}, 2026</span>
+                      </div>
+                      <div className="flex justify-between border-b border-gold/10 pb-4">
+                        <span className="text-ivory/60 text-[13px] font-body">Check-out</span>
+                        <span className="text-ivory text-[13px] font-body">April {range.end}, 2026</span>
+                      </div>
+                      <div className="flex justify-between border-b border-gold/10 pb-4">
+                        <span className="text-ivory/60 text-[13px] font-body">Nights</span>
+                        <span className="text-ivory text-[13px] font-body">{nights}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-gold/10 pb-4">
+                        <span className="text-ivory/60 text-[13px] font-body">Guests</span>
+                        <span className="text-ivory text-[13px] font-body">{guests.adults} Adults, {guests.children} Children</span>
+                      </div>
+                      {selectedRoom && (
+                        <div className="flex justify-between border-b border-gold/10 pb-4">
+                          <span className="text-ivory/60 text-[13px] font-body">Room</span>
+                          <span className="text-gold text-[13px] font-body">{selectedRoom.name}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-4 mb-10">
+                      <div className="flex justify-between text-ivory/60 text-[12px] font-body">
+                        <span>Subtotal</span>
+                        <span>KSh {subtotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-ivory/60 text-[12px] font-body">
+                        <span>VAT (16%)</span>
+                        <span>KSh {vat.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-end pt-4">
+                        <span className="text-gold text-[12px] uppercase tracking-widest font-body">Total</span>
+                        <span className="text-3xl font-display text-gold italic">KSh {total.toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={nextStep}
+                      disabled={!selectedRoomId}
+                      className={`w-full py-5 text-[13px] uppercase tracking-[0.2em] font-body transition-all duration-500
+                        ${selectedRoomId ? "bg-gold text-ivory hover:bg-gold-mid shadow-2xl" : "bg-white/10 text-white/30 cursor-not-allowed"}
+                      `}
+                    >
+                      Continue Details →
+                    </button>
+                    <button onClick={() => setStep(1)} className="w-full text-center text-ivory/40 text-[11px] uppercase tracking-widest mt-6 hover:text-gold transition-colors font-body">
+                      Back to Date Selection
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* STEP 3 */}
+            {step === 3 && (
+              <motion.div 
+                key="step3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="grid grid-cols-1 lg:grid-cols-5 gap-12"
+              >
+                <div className="lg:col-span-3 space-y-12">
+                  <div className="bg-white p-8 md:p-14 shadow-sm border border-gold/5">
+                    <h3 className="text-2xl font-display italic mb-10">Personal Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">First Name</label>
+                        <input type="text" value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Last Name</label>
+                        <input type="text" value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Email Address</label>
+                        <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Phone</label>
+                        <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent" />
+                      </div>
+                    </div>
+
+                    <h3 className="text-2xl font-display italic mb-10">Stay Preferences</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                       <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Estimated Arrival</label>
+                        <select value={form.arrivalTime} onChange={e => setForm({...form, arrivalTime: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent">
+                          {["12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "Later"].map(t => <option key={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Nationality</label>
+                        <select value={form.nationality} onChange={e => setForm({...form, nationality: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent">
+                          {["Kenyan", "Other East African", "International"].map(n => <option key={n}>{n}</option>)}
+                        </select>
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Special Requests</label>
+                        <textarea rows={3} value={form.requests} onChange={e => setForm({...form, requests: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent resize-none" placeholder="Allergies, high floor, etc." />
+                      </div>
+                    </div>
+
+                    <h3 className="text-2xl font-display italic mb-10">Payment Method</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+                      {["hotel", "online", "deposit"].map(m => (
+                        <div 
+                          key={m}
+                          onClick={() => setForm({...form, payment: m})}
+                          className={`p-6 border-2 cursor-pointer transition-all duration-300 text-center
+                            ${form.payment === m ? "border-gold bg-gold/5" : "border-gold/10 hover:border-gold/30"}
+                          `}
+                        >
+                          <div className={`w-4 h-4 rounded-full border border-gold mx-auto mb-4 flex items-center justify-center p-0.5`}>
+                            {form.payment === m && <div className="w-full h-full bg-gold rounded-full" />}
+                          </div>
+                          <p className="text-[11px] uppercase tracking-widest font-body text-charcoal">
+                            {m === "hotel" ? "Pay at Hotel" : m === "online" ? "Pay Online" : "Pay Deposit"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-start gap-4 mb-12">
+                      <input type="checkbox" id="terms" checked={form.agreed} onChange={e => setForm({...form, agreed: e.target.checked})} className="mt-1 accent-gold" />
+                      <label htmlFor="terms" className="text-[13px] font-body font-light text-charcoal/60 leading-relaxed">
+                        I agree to the <a href="#" className="text-gold border-b border-gold/30">Terms & Conditions</a> and processing of my personal data for the reservation.
+                      </label>
+                    </div>
+
+                    {submitError && (
+                      <p className="text-red-400 text-sm font-body mb-4 text-center">{submitError}</p>
+                    )}
+                    <button 
+                      onClick={handleSubmit}
+                      disabled={!form.agreed || !form.email || !form.firstName || isSubmitting}
+                      className={`w-full py-5 text-[14px] uppercase tracking-[0.25em] font-body font-semibold transition-all duration-500 flex items-center justify-center gap-3
+                        ${form.agreed && form.email && form.firstName && !isSubmitting ? "bg-gold text-ivory hover:bg-gold-mid shadow-2xl" : "bg-gold-muted/30 text-gold-muted cursor-not-allowed"}
+                      `}
+                    >
+                      {isSubmitting ? (
+                        <><span className="w-4 h-4 border-2 border-ivory/40 border-t-ivory rounded-full animate-spin" /> Sending Request...</>
+                      ) : 'Confirm Reservation'}
+                    </button>
+                    <button onClick={() => setStep(2)} className="w-full text-center text-charcoal/30 text-[11px] uppercase tracking-widest mt-6 hover:text-gold transition-colors font-body">
+                      Back to Room Options
+                    </button>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-2">
+                  <div className="bg-espresso p-8 md:p-12 text-ivory sticky top-32">
+                    <div className="flex items-center gap-4 mb-12 opacity-80 scale-90 -ml-4">
+                      <div className="w-10 h-10 border border-gold flex items-center justify-center font-display italic text-gold text-xl">L</div>
+                      <h4 className="text-[12px] uppercase tracking-[0.3em] font-display">Little Luxury</h4>
+                    </div>
+
+                    <div className="space-y-8 mb-12">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-20 h-16 bg-white/10 overflow-hidden flex-shrink-0">
+                            {selectedRoom && (
+                              <img src={getFileUrl(selectedRoom, selectedRoom.image, '160x128')} alt="" className="w-full h-full object-cover opacity-60" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase tracking-widest text-gold mb-1">Room Selected</p>
+                            <p className="text-lg font-display">{selectedRoom?.name}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-8 border-y border-white/10 py-8">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Arrival</p>
+                          <p className="text-[15px] font-body">{range.start} April, 2026</p>
+                          <p className="text-[11px] text-ivory/40 mt-1">From 2:00 PM</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Departure</p>
+                          <p className="text-[15px] font-body">{range.end} April, 2026</p>
+                          <p className="text-[11px] text-ivory/40 mt-1">By 11:00 AM</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <p className="text-ivory/50 text-[13px] font-body">{nights} Night Stay (x{guests.adults} Adults)</p>
+                          <p className="text-[14px] font-body">KSh {subtotal.toLocaleString()}</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-ivory/50 text-[13px] font-body">Taxes & Fees</p>
+                          <p className="text-[14px] font-body">KSh {vat.toLocaleString()}</p>
+                        </div>
+                        <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                          <p className="text-gold text-[12px] uppercase tracking-[0.2em] font-body">Total Amount</p>
+                          <p className="text-2xl font-display text-gold italic underline decoration-gold/30 underline-offset-8">KSh {total.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/5 p-6 space-y-4">
+                      <div className="flex items-center gap-3 text-[12px] font-body text-ivory/70">
+                         <ShieldCheck size={14} className="text-gold" /> Free cancellation 48hrs before
+                      </div>
+                      <div className="flex items-center gap-3 text-[12px] font-body text-ivory/70">
+                         <ShieldCheck size={14} className="text-gold" /> Best rate guarantee
+                      </div>
+                      <div className="flex items-center gap-3 text-[12px] font-body text-ivory/70">
+                         <ShieldCheck size={14} className="text-gold" /> Instant confirmation
+                      </div>
+                    </div>
+
+                    <div className="mt-8 flex items-center gap-4 text-ivory/40">
+                      <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center">
+                        <Phone size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest leading-none mb-1">Support Line</p>
+                        <p className="text-[13px] font-body text-gold">+254 700 000 000</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* Success Overlay */}
+      <AnimatePresence>
+        {isSuccess && (
+          <motion.div 
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 100 }}
+            className="fixed inset-0 z-[100] bg-ivory flex flex-col items-center justify-center p-6 text-center"
+          >
+            <FadeIn>
+              <div className="w-24 h-24 rounded-full border border-gold flex items-center justify-center mb-10 mx-auto relative">
+                <motion.div
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                >
+                  <Check className="text-gold" size={48} />
+                </motion.div>
+                <div className="absolute inset-0 rounded-full border border-gold animate-ping opacity-20" />
+              </div>
+              
+              <h2 className="text-charcoal text-5xl md:text-[60px] font-display italic font-light mb-6">Reservation Confirmed!</h2>
+              <p className="text-charcoal/60 text-lg font-body font-light mb-12 max-w-lg mx-auto">
+                Thank you for your trust, {form.firstName}. Your booking reference is <span className="text-gold font-semibold">{bookingRef}</span>. Our team will review your request and contact you at {form.email} to confirm within a few hours.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-md mx-auto">
+                <button className="flex-1 py-4 border border-gold text-gold text-[13px] uppercase tracking-[0.2em] font-body font-medium hover:bg-gold hover:text-ivory transition-all duration-500">
+                  View Booking
+                </button>
+                <Link to="/" className="flex-1 py-4 bg-espresso text-gold text-[13px] uppercase tracking-[0.2em] font-body font-medium hover:bg-black transition-all duration-500">
+                  Return Home
+                </Link>
+              </div>
+            </FadeIn>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Footer />
+    </div>
+  );
+}
