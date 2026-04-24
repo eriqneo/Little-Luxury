@@ -382,7 +382,7 @@ export default function BookingPage() {
                 className="grid grid-cols-1 lg:grid-cols-3 gap-12"
               >
                 <div className="lg:col-span-2 space-y-8">
-                  {loading ? (
+                  {roomsLoading ? (
                     <div className="text-gold text-sm uppercase tracking-widest animate-pulse py-20 text-center">Loading Rooms...</div>
                   ) : rooms.map((room) => (
                     <div 

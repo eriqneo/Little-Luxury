@@ -6,24 +6,37 @@ export function useReservations() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initial fetch
+    let cancelled = false;
+
+    // Initial fetch — requestKey: null prevents SDK auto-cancellation
     pb.collection('reservations')
-      .getFullList({ sort: '-created' })
-      .then((res) => setReservations(res as unknown as Reservation[]))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .getFullList({ sort: '-created', requestKey: null })
+      .then((res) => {
+        if (!cancelled) setReservations(res as unknown as Reservation[]);
+      })
+      .catch((err) => {
+        if (err?.isAbort) return; // Silently ignore auto-cancellations
+        console.error('useReservations error:', err);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
     // 🔴 Real-time subscription — calendar updates instantly when admin books a date
     pb.collection('reservations').subscribe('*', ({ action, record }) => {
+      if (cancelled) return;
       setReservations(prev => {
         if (action === 'create') return [...prev, record as unknown as Reservation];
         if (action === 'update') return prev.map(r => r.id === record.id ? record as unknown as Reservation : r);
         if (action === 'delete') return prev.filter(r => r.id !== record.id);
         return prev;
       });
+    }).catch(() => {
+      // PocketHost realtime may not work on all plans — fail silently
     });
 
     return () => {
+      cancelled = true;
       pb.collection('reservations').unsubscribe('*');
     };
   }, []);

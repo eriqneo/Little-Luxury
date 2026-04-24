@@ -6,11 +6,25 @@ export function useRooms() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     pb.collection('rooms')
-      .getFullList({ sort: '+sort_order' })
-      .then((res) => setRooms(res as unknown as Room[]))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .getFullList({ sort: '+sort_order', requestKey: null })
+      .then((res) => {
+        if (!cancelled) setRooms(res as unknown as Room[]);
+      })
+      .catch((err) => {
+        // Silently ignore auto-cancellations
+        if (err?.isAbort) return;
+        console.error('useRooms error:', err);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { rooms, loading };
