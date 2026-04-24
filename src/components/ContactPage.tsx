@@ -120,8 +120,6 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-ivory">
-      <Navbar />
-
       {/* HERO */}
       <section className="relative h-[35vh] min-h-[300px] flex items-center justify-center overflow-hidden">
         <div
@@ -386,8 +384,6 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

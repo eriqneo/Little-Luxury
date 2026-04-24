@@ -86,7 +86,6 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-ivory">
-      <Navbar />
 
       {/* ── HERO — always rendered so heroRef stays attached ────────────── */}
       <section ref={heroRef} className="relative h-[60vh] flex items-center justify-center overflow-hidden">
@@ -252,8 +251,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

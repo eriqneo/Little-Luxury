@@ -54,8 +54,10 @@ export interface SiteSettings {
   home_about_img_2?: string;
   home_booking_title?: string;
   home_booking_text?: string;
-  home_booking_bg?: string;
   checkin_checkout?: string;
+  virtual_tour_video?: string;
+  virtual_tour_enabled?: boolean;
+  booking_agreement_text?: string;
 }
 
 export interface Room {

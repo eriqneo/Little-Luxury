@@ -62,8 +62,6 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-ivory">
-      <Navbar />
-
       <main className="pt-24 md:pt-32">
         {/* Header Section */}
         <section className="py-20 bg-charcoal">
@@ -126,8 +124,6 @@ export default function GalleryPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
 
       {/* Lightbox */}
       <AnimatePresence>

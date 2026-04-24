@@ -32,8 +32,6 @@ export default function RoomsPage() {
 
   return (
     <div className="min-h-screen bg-ivory">
-      <Navbar />
-
       <main>
         {/* Hero Banner */}
         <section className="relative h-[50vh] w-full flex items-center justify-center overflow-hidden">
@@ -164,8 +162,6 @@ export default function RoomsPage() {
         </section>
       </main>
 
-      <Footer />
-      
       <style>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;

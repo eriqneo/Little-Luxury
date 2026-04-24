@@ -20,12 +20,25 @@ import AboutPage from "./components/AboutPage";
 import ContactPage from "./components/ContactPage";
 import GalleryPage from "./components/GalleryPage";
 import SurveyPage from "./components/SurveyPage";
+import VirtualTourModal from "./components/VirtualTourModal";
+import { useState } from "react";
+
+function MainLayout({ children }: { children: React.ReactNode }) {
+  const [isTourOpen, setIsTourOpen] = useState(false);
+
+  return (
+    <>
+      <Navbar onTourClick={() => setIsTourOpen(true)} />
+      {children}
+      <Footer />
+      <VirtualTourModal isOpen={isTourOpen} onClose={() => setIsTourOpen(false)} />
+    </>
+  );
+}
 
 function HomePage() {
   return (
     <div className="min-h-screen bg-ivory">
-      <Navbar />
-      
       <main>
         <Hero />
         
@@ -70,8 +83,6 @@ function HomePage() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }
@@ -82,15 +93,17 @@ export default function App() {
       <LoadingScreen />
       <StickyBooking />
       <CookieBanner />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/rooms" element={<RoomsPage />} />
-        <Route path="/booking" element={<BookingPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/gallery" element={<GalleryPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/survey" element={<SurveyPage />} />
-      </Routes>
+      <MainLayout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/rooms" element={<RoomsPage />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/survey" element={<SurveyPage />} />
+        </Routes>
+      </MainLayout>
     </Router>
   );
 }

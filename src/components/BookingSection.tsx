@@ -19,6 +19,7 @@ export default function BookingSection() {
     children: "0",
     roomType: "Any Room",
     specialRequests: "",
+    agreed: false,
   });
 
   const validate = () => {
@@ -249,9 +250,26 @@ export default function BookingSection() {
                     />
                   </div>
 
+                  {/* Row 5: Agreement */}
+                  <div className="flex items-start gap-3 pt-4">
+                    <input 
+                      type="checkbox" 
+                      id="agree-home"
+                      checked={formData.agreed}
+                      onChange={(e) => setFormData({...formData, agreed: e.target.checked})}
+                      className="mt-1 accent-gold cursor-pointer"
+                    />
+                    <label htmlFor="agree-home" className="text-[12px] font-body font-light text-ivory/60 leading-relaxed cursor-pointer select-none">
+                      {settings?.booking_agreement_text || "I agree to the Little Luxury house rules and cancellation policy."}
+                    </label>
+                  </div>
+
                   <button 
                     type="submit"
-                    className="w-full bg-gold text-ivory text-[13px] uppercase tracking-[0.2em] font-body font-medium py-5 hover:bg-gold-mid transition-all duration-500 shadow-lg"
+                    disabled={!formData.agreed}
+                    className={`w-full py-5 text-[13px] uppercase tracking-[0.2em] font-body font-medium transition-all duration-500 shadow-2xl mt-8
+                      ${formData.agreed ? "bg-gold text-ivory hover:bg-ivory hover:text-charcoal" : "bg-gold/20 text-ivory/30 cursor-not-allowed"}
+                    `}
                   >
                     Check Availability
                   </button>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Logo from "./Logo";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Play } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useSiteSettings } from "../hooks/useSiteSettings";
 
@@ -13,7 +13,7 @@ const NAV_LINKS = [
   { name: "Contact", href: "/contact" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ onTourClick }: { onTourClick?: () => void }) {
   const { settings } = useSiteSettings();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -41,15 +41,39 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto px-4 md:px-8 flex items-center justify-between gap-4 min-w-0">
-        {/* Branding */}
-        <Link to="/" className="flex items-center gap-2 group flex-shrink-0 min-w-0">
-          <Logo className="transition-transform duration-500 group-hover:scale-110 shadow-lg border border-gold/30 flex-shrink-0" />
-          <span className={`font-display font-semibold transition-colors duration-700 tracking-[0.1em] uppercase leading-none truncate ${
-            isScrolled ? "text-gold" : "text-ivory"
-          }`} style={{ fontSize: 'clamp(0.8rem, 1.5vw, 1.1rem)' }}>
-            {settings?.site_name || "Little Luxury"}
-          </span>
-        </Link>
+        <div className="flex items-center gap-4 flex-shrink-0 min-w-0">
+          <Link to="/" className="flex items-center gap-2 group flex-shrink-0 min-w-0">
+            <Logo className="transition-transform duration-500 group-hover:scale-110 shadow-lg border border-gold/30 flex-shrink-0" />
+            <span className={`font-display font-semibold transition-colors duration-700 tracking-[0.1em] uppercase leading-none truncate ${
+              isScrolled ? "text-gold" : "text-ivory"
+            }`} style={{ fontSize: 'clamp(0.8rem, 1.5vw, 1.1rem)' }}>
+              {settings?.site_name || "Little Luxury"}
+            </span>
+          </Link>
+
+          {/* Virtual Tour Button */}
+          {settings?.virtual_tour_enabled && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onTourClick?.();
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 border transition-all duration-500 group/tour ${
+                isScrolled 
+                  ? "border-gold/30 text-gold hover:border-gold" 
+                  : "border-ivory/20 text-ivory/80 hover:border-ivory hover:text-ivory"
+              }`}
+            >
+              <div className="relative">
+                <Play size={12} className="fill-current" />
+                <div className="absolute inset-0 rounded-full animate-ping bg-current opacity-20" />
+              </div>
+              <span className="text-[9px] uppercase tracking-[0.2em] font-body font-medium whitespace-nowrap">
+                Virtual Tour
+              </span>
+            </button>
+          )}
+        </div>
 
         {/* Desktop Navigation */}
         <div className="hidden 2xl:flex items-center gap-4 2xl:gap-8 flex-shrink-0">

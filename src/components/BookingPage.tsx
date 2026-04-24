@@ -210,8 +210,6 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-ivory">
-      <Navbar />
-      
       {/* Hero */}
       <section className="relative h-[40vh] min-h-[400px] flex items-center justify-center overflow-hidden">
         <div 
@@ -563,9 +561,9 @@ export default function BookingPage() {
                     </div>
 
                     <div className="flex items-start gap-4 mb-12">
-                      <input type="checkbox" id="terms" checked={form.agreed} onChange={e => setForm({...form, agreed: e.target.checked})} className="mt-1 accent-gold" />
-                      <label htmlFor="terms" className="text-[13px] font-body font-light text-charcoal/60 leading-relaxed">
-                        I agree to the <a href="#" className="text-gold border-b border-gold/30">Terms & Conditions</a> and processing of my personal data for the reservation.
+                      <input type="checkbox" id="terms" checked={form.agreed} onChange={e => setForm({...form, agreed: e.target.checked})} className="mt-1 accent-gold cursor-pointer" />
+                      <label htmlFor="terms" className="text-[13px] font-body font-light text-charcoal/60 leading-relaxed cursor-pointer select-none">
+                        {settings?.booking_agreement_text || "I agree to the Little Luxury house rules, cancellation policy, and processing of my personal data for the reservation."}
                       </label>
                     </div>
 
@@ -709,7 +707,6 @@ export default function BookingPage() {
         )}
       </AnimatePresence>
 
-      <Footer />
     </div>
   );
 }

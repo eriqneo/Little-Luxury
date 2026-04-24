@@ -46,8 +46,6 @@ export default function SurveyPage() {
 
   return (
     <div className="min-h-screen bg-ivory">
-      <Navbar />
-      
       {/* Hero / Header Section */}
       <section className="relative pt-40 pb-20 bg-espresso overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -213,8 +211,6 @@ export default function SurveyPage() {
           </AnimatePresence>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }
