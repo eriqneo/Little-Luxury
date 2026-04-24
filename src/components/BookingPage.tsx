@@ -505,19 +505,19 @@ export default function BookingPage() {
                     <h3 className="text-2xl font-display italic mb-10">Personal Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                       <div className="space-y-2">
-                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">First Name</label>
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">First Name</label>
                         <input type="text" value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Last Name</label>
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Last Name</label>
                         <input type="text" value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Email Address</label>
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Email Address</label>
                         <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Phone</label>
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Phone</label>
                         <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent" />
                       </div>
                     </div>
@@ -525,19 +525,19 @@ export default function BookingPage() {
                     <h3 className="text-2xl font-display italic mb-10">Stay Preferences</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                        <div className="space-y-2">
-                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Estimated Arrival</label>
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Estimated Arrival</label>
                         <select value={form.arrivalTime} onChange={e => setForm({...form, arrivalTime: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent">
                           {["12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "Later"].map(t => <option key={t}>{t}</option>)}
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Nationality</label>
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Nationality</label>
                         <select value={form.nationality} onChange={e => setForm({...form, nationality: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent">
                           {["Kenyan", "Other East African", "International"].map(n => <option key={n}>{n}</option>)}
                         </select>
                       </div>
                       <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] uppercase tracking-widest text-charcoal/50 font-body">Special Requests</label>
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Special Requests</label>
                         <textarea rows={3} value={form.requests} onChange={e => setForm({...form, requests: e.target.value})} className="w-full border-b border-gold/20 py-2 font-body text-[15px] outline-none focus:border-gold bg-transparent resize-none" placeholder="Allergies, high floor, etc." />
                       </div>
                     </div>

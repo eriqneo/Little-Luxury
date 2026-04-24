@@ -136,7 +136,7 @@ export default function BookingSection() {
                   {/* Row 0: Contact Info */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                     <div className="group">
-                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-medium text-ivory/90 mb-2">
                         Full Name
                       </label>
                       <input 
@@ -149,7 +149,7 @@ export default function BookingSection() {
                       {errors.name && <span className="text-gold text-[10px] uppercase font-body mt-2 block">{errors.name}</span>}
                     </div>
                     <div className="group">
-                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-medium text-ivory/90 mb-2">
                         Email Address
                       </label>
                       <input 
@@ -166,7 +166,7 @@ export default function BookingSection() {
                   {/* Row 1: Dates */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                     <div className="group">
-                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-medium text-ivory/90 mb-2">
                         Check-in Date
                       </label>
                       <input 
@@ -178,7 +178,7 @@ export default function BookingSection() {
                       {errors.checkIn && <span className="text-gold text-[10px] uppercase font-body mt-2 block">{errors.checkIn}</span>}
                     </div>
                     <div className="group">
-                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-medium text-ivory/90 mb-2">
                         Check-out Date
                       </label>
                       <input 
@@ -194,7 +194,7 @@ export default function BookingSection() {
                   {/* Row 2: Guests */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                     <div>
-                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-medium text-ivory/90 mb-2">
                         Adults
                       </label>
                       <select 
@@ -206,7 +206,7 @@ export default function BookingSection() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-medium text-ivory/90 mb-2">
                         Children
                       </label>
                       <select 
@@ -221,7 +221,7 @@ export default function BookingSection() {
 
                   {/* Row 3: Room Type */}
                   <div>
-                    <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                    <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-medium text-ivory/90 mb-2">
                       Room Type
                     </label>
                     <select 
@@ -237,7 +237,7 @@ export default function BookingSection() {
 
                   {/* Row 4: Special Requests */}
                   <div>
-                    <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                    <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-medium text-ivory/90 mb-2">
                       Special Requests
                     </label>
                     <textarea 

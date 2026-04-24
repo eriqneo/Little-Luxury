@@ -161,22 +161,22 @@ export default function ContactPage() {
                     >
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-charcoal/40 font-body">Full Name</label>
+                          <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Full Name</label>
                           <input required type="text" className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors" />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-charcoal/40 font-body">Email Address</label>
+                          <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Email Address</label>
                           <input required type="email" className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors" />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-charcoal/40 font-body">Phone</label>
+                          <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Phone</label>
                           <input type="tel" className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors" />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest text-charcoal/40 font-body">Subject</label>
+                          <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Subject</label>
                           <select className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors">
                             <option>General Enquiry</option>
                             <option>Room Reservation</option>
@@ -188,7 +188,7 @@ export default function ContactPage() {
                       </div>
 
                       <div className="space-y-2 relative">
-                        <label className="text-[10px] uppercase tracking-widest text-charcoal/40 font-body">Message</label>
+                        <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Message</label>
                         <textarea
                           required
                           rows={5}
