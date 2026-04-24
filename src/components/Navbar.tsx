@@ -51,27 +51,48 @@ export default function Navbar({ onTourClick }: { onTourClick?: () => void }) {
             </span>
           </Link>
 
-          {/* Virtual Tour Button */}
+          {/* Creative Virtual Tour Button */}
           {settings?.virtual_tour_enabled && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={(e) => {
                 e.preventDefault();
                 onTourClick?.();
               }}
-              className={`flex items-center gap-2 px-3 py-1.5 border transition-all duration-500 group/tour ${
-                isScrolled 
-                  ? "border-gold/30 text-gold hover:border-gold" 
-                  : "border-ivory/20 text-ivory/80 hover:border-ivory hover:text-ivory"
+              className={`relative flex items-center group/tour ml-2 transition-all duration-500 ${
+                isScrolled ? "text-gold" : "text-ivory"
               }`}
             >
-              <div className="relative">
-                <Play size={12} className="fill-current" />
-                <div className="absolute inset-0 rounded-full animate-ping bg-current opacity-20" />
+              {/* Outer Glow/Ring */}
+              <div className="absolute inset-0 rounded-full bg-gold/20 scale-125 blur-md opacity-0 group-hover/tour:opacity-100 transition-opacity duration-700 animate-pulse" />
+              
+              {/* The "Lens" Button */}
+              <div className={`relative flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full border backdrop-blur-sm overflow-hidden transition-all duration-500 ${
+                isScrolled 
+                  ? "border-gold/30 bg-white/5 hover:border-gold hover:bg-gold/10" 
+                  : "border-ivory/20 bg-ivory/5 hover:border-gold hover:bg-gold/20"
+              }`}>
+                {/* Rotating Play/360 Icon */}
+                <div className="relative w-6 h-6 flex items-center justify-center rounded-full bg-gold/10 group-hover/tour:bg-gold transition-colors duration-500">
+                  <Play 
+                    size={10} 
+                    className={`fill-current group-hover/tour:text-ivory transition-colors duration-500 ${
+                      isScrolled ? "text-gold" : "text-ivory"
+                    }`} 
+                  />
+                  {/* Subtle spinning ring on hover */}
+                  <div className="absolute inset-[-2px] border border-gold/40 border-t-transparent rounded-full opacity-0 group-hover/tour:opacity-100 animate-spin transition-opacity duration-500" />
+                </div>
+
+                <span className="text-[9px] uppercase tracking-[0.25em] font-body font-semibold whitespace-nowrap">
+                  Virtual Tour
+                </span>
+
+                {/* Shimmer Effect */}
+                <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover/tour:translate-x-[250%] transition-transform duration-1000 ease-in-out" />
               </div>
-              <span className="text-[9px] uppercase tracking-[0.2em] font-body font-medium whitespace-nowrap">
-                Virtual Tour
-              </span>
-            </button>
+            </motion.button>
           )}
         </div>
 
@@ -156,6 +177,19 @@ export default function Navbar({ onTourClick }: { onTourClick?: () => void }) {
                     {link.name}
                   </Link>
                 ))}
+                
+                {settings?.virtual_tour_enabled && (
+                  <button 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      onTourClick?.();
+                    }}
+                    className="text-sm uppercase tracking-[0.2em] font-body font-light text-gold flex items-center gap-2 group/tour"
+                  >
+                    <Play size={14} className="fill-current" />
+                    Virtual Tour
+                  </button>
+                )}
                 
                 <Link 
                   to="/booking"
