@@ -14,8 +14,14 @@
 }
 
 @layer base {
+  html {
+    @apply overflow-x-hidden scroll-smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
   body {
-    @apply bg-ivory text-charcoal font-body font-light antialiased;
+    @apply bg-ivory text-charcoal font-body font-light antialiased overflow-x-hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -32,49 +38,48 @@
    ========================================================================== */
 
 @layer base {
-  /* 
-   * 1. Relative Units & System Scale
-   * By adjusting the root font-size based on the DPI, all 'rem' measurements 
-   * (Tailwind's spacing, max-widths, etc) will naturally scale down to counteract 
-   * the Windows 125%/150% aggressive OS-level zoom.
-   */
-   
   /* Target Windows 125% Scaling (approx 120dpi) */
   @media (min-resolution: 120dpi) {
     html {
-      font-size: 85%; /* Softly counteracts 1.25x scale */
+      font-size: 90%; /* Softly counteracts 1.25x scale */
     }
   }
 
   /* Target Windows 150% Scaling (approx 144dpi) */
   @media (min-resolution: 144dpi) {
     html {
-      font-size: 75%; /* Softly counteracts 1.5x scale */
+      font-size: 80%; /* Softly counteracts 1.5x scale */
+    }
+  }
+
+  /* Target Windows 175% Scaling (approx 168dpi) */
+  @media (min-resolution: 168dpi) {
+    html {
+      font-size: 70%; 
     }
   }
 }
 
 /* 
  * 2. Min-Resolution Targeted Container Adjustments 
- * Ensure tight containers gracefully handle the scaled-up rendering
  */
 @media (min-resolution: 120dpi) {
   /* Prevent fixed px max-widths from breaking out of the viewport */
   [class*="max-w-["] {
-    max-width: min(100%, var(--tw-max-w, 100%)) !important;
+    max-width: min(100vw - 2rem, var(--tw-max-w, 100%)) !important;
   }
 
   /* Ensure padding uses relative viewport/rem units rather than fixed spacing on tight displays */
   .container {
-    padding-left: clamp(1rem, 3vw, 4rem) !important;
-    padding-right: clamp(1rem, 3vw, 4rem) !important;
+    padding-left: clamp(1rem, 5vw, 2rem) !important;
+    padding-right: clamp(1rem, 5vw, 2rem) !important;
+    max-width: min(100%, 1400px) !important;
   }
   
-  /* 
-   * 3. Flexbox/Grid Gap Enforcement 
-   * Prevent elements from overlapping when OS-zoomed by ensuring flex children 
-   * can shrink (min-width: 0) and spacing relies on flex-gap instead of fixed margins.
-   */
+  /* Ensure flex children can shrink */
+  .flex {
+    min-width: 0;
+  }
   .flex > * {
     min-width: 0;
   }
@@ -82,24 +87,28 @@
 
 /* 
  * 4. Fluid Typography Implementation
- * We apply clamp() to headers and base text inside high-DPI environments 
- * to ensure text doesn't aggressively push UI elements (nav, buttons) out of bounds.
  */
 @media (min-resolution: 120dpi) {
-  /* Main display headings */
   h1, h2 {
-    font-size: clamp(2rem, 5vw + 1rem, 4.5rem) !important;
+    font-size: clamp(2.25rem, 6vw + 1rem, 4.5rem) !important;
     line-height: 1.1 !important;
+    letter-spacing: -0.02em !important;
   }
 
-  /* Subheadings */
   h3, h4 {
-    font-size: clamp(1.25rem, 3vw + 0.5rem, 2.5rem) !important;
+    font-size: clamp(1.5rem, 4vw + 0.5rem, 2.5rem) !important;
   }
 
-  /* Body text */
   p {
-    font-size: clamp(0.85rem, 1vw + 0.5rem, 1.05rem) !important;
+    font-size: clamp(0.9rem, 1.2vw + 0.5rem, 1.1rem) !important;
+    line-height: 1.6 !important;
     word-break: break-word;
+  }
+}
+
+/* Fix for Windows Scrollbars taking up space */
+@supports (scrollbar-gutter: stable) {
+  html {
+    scrollbar-gutter: stable;
   }
 }

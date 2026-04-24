@@ -34,7 +34,7 @@ export default function Rooms() {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 md:gap-16">
           {previewRooms.map((room, index) => (
             <div key={room.id}>
               <FadeIn direction="up" delay={index * 0.1}>
@@ -50,24 +50,24 @@ export default function Rooms() {
                   </div>
 
                   {/* Info Panel */}
-                  <div className="py-8">
+                  <div className="py-6 sm:py-8">
                     <span className="text-gold text-[10px] uppercase tracking-[0.2em] font-body block mb-3">
                       {room.type_label}
                     </span>
-                    <h3 className="text-charcoal text-[22px] font-display font-normal mb-3 group-hover:text-gold transition-colors duration-300 truncate">
+                    <h3 className="text-charcoal text-[20px] sm:text-[22px] font-display font-normal mb-3 group-hover:text-gold transition-colors duration-300 truncate">
                       {room.name}
                     </h3>
-                    <div className="flex items-center gap-2 text-[#888] text-[12px] font-body font-light mb-4">
+                    <div className="flex items-center gap-2 text-[#888] text-[11px] sm:text-[12px] font-body font-light mb-4">
                       <span>{room.guests} Guests</span>
                       <span className="opacity-40">·</span>
                       <span>{room.bed}</span>
                     </div>
-                    <div className="text-charcoal text-[18px] font-display italic mb-6">
-                      From KSh {room.price.toLocaleString()} <span className="text-[10px] opacity-50 not-italic uppercase tracking-widest ml-1">/ night</span>
+                    <div className="text-charcoal text-[16px] sm:text-[18px] font-display italic mb-6">
+                      From KSh {room.price.toLocaleString()} <span className="text-[9px] sm:text-[10px] opacity-50 not-italic uppercase tracking-widest ml-1">/ night</span>
                     </div>
                     <Link
                       to={`/booking`}
-                      className="inline-block text-gold text-[12px] uppercase tracking-[0.1em] font-body font-medium transition-all group-hover:translate-x-2"
+                      className="inline-block text-gold text-[11px] sm:text-[12px] uppercase tracking-[0.1em] font-body font-medium transition-all group-hover:translate-x-2"
                     >
                       Book Room →
                     </Link>

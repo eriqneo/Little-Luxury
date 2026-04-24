@@ -65,9 +65,9 @@ export default function BookingSection() {
 
   return (
     <section id="book" className="w-full overflow-hidden">
-      <div className="flex flex-col md:flex-row min-h-[700px]">
+      <div className="flex flex-col lg:flex-row min-h-[700px]">
         {/* Left Side - Image & Branding */}
-        <div className="md:w-1/2 relative min-h-[400px] md:min-h-0 flex items-center justify-center py-20 px-12">
+        <div className="lg:w-1/2 relative min-h-[400px] lg:min-h-0 flex items-center justify-center py-20 px-6 sm:px-12">
           <div 
             className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"
             style={{ backgroundImage: bgUrl ? `url("${bgUrl}")` : 'none', opacity: bgUrl ? 1 : 0 }}
@@ -77,18 +77,18 @@ export default function BookingSection() {
           
           <div className="relative z-20 text-center text-white max-w-2xl">
             <FadeIn direction="up">
-              <span className="text-gold text-[11px] uppercase tracking-[0.4em] font-body font-light block mb-6">
+              <span className="text-gold text-[10px] sm:text-[11px] uppercase tracking-[0.4em] font-body font-light block mb-6">
                 RESERVATIONS
               </span>
-              <h2 className="text-5xl md:text-[52px] font-display italic font-light leading-tight mb-6">
+              <h2 className="text-4xl sm:text-5xl lg:text-[52px] font-display italic font-light leading-tight mb-6">
                 {title}
               </h2>
-              <p className="text-white/80 font-body font-light text-[15px] mb-12">
+              <p className="text-white/80 font-body font-light text-[14px] sm:text-[15px] mb-12">
                 {text}
               </p>
               
               {/* Gold Seal/Badge */}
-              <div className="relative w-32 h-32 mx-auto flex items-center justify-center">
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32 mx-auto flex items-center justify-center">
                 <svg className="absolute inset-0 w-full h-full animate-[spin_10s_linear_infinite]" viewBox="0 0 100 100">
                   <path
                     id="circlePath"
@@ -101,22 +101,24 @@ export default function BookingSection() {
                     </textPath>
                   </text>
                 </svg>
-                <div className="w-20 h-20 rounded-full border border-gold/30 flex items-center justify-center bg-white/5 backdrop-blur-sm">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-gold/30 flex items-center justify-center bg-white/5 backdrop-blur-sm">
                   <span className="text-gold text-xs font-display italic tracking-widest font-semibold">LL</span>
                 </div>
               </div>
 
               {/* At-a-glance Calendar */}
-              <div className="mt-20 flex flex-col items-center">
-                <p className="text-gold/40 text-[10px] uppercase tracking-[0.3em] mb-8">Availability at a glance</p>
-                <AvailabilityCalendar />
+              <div className="mt-16 sm:mt-20 flex flex-col items-center">
+                <p className="text-gold/40 text-[9px] sm:text-[10px] uppercase tracking-[0.3em] mb-8">Availability at a glance</p>
+                <div className="w-full max-w-md mx-auto overflow-x-auto lg:overflow-visible">
+                  <AvailabilityCalendar />
+                </div>
               </div>
             </FadeIn>
           </div>
         </div>
 
         {/* Right Side - Form */}
-        <div className="md:w-1/2 bg-espresso p-8 md:p-14 lg:p-20 relative overflow-hidden flex flex-col justify-center">
+        <div className="lg:w-1/2 bg-espresso p-6 sm:p-10 md:p-14 lg:p-20 relative overflow-hidden flex flex-col justify-center">
           <AnimatePresence mode="wait">
             {!isSubmitted ? (
               <motion.div

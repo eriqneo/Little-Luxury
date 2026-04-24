@@ -52,7 +52,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden xl:flex items-center gap-4 2xl:gap-8 flex-shrink-0">
+        <div className="hidden 2xl:flex items-center gap-4 2xl:gap-8 flex-shrink-0">
           <div className="flex items-center gap-4 2xl:gap-8">
             {NAV_LINKS.map((link) => (
               <Link
@@ -83,7 +83,7 @@ export default function Navbar() {
 
         {/* Mobile Hamburger Icon */}
         <button
-          className={`xl:hidden transition-colors duration-700 hover:opacity-80 flex-shrink-0 ${
+          className={`2xl:hidden transition-colors duration-700 hover:opacity-80 flex-shrink-0 ${
             isScrolled ? "text-gold" : "text-ivory"
           }`}
           onClick={() => setIsMobileMenuOpen(true)}
