@@ -54,9 +54,13 @@ function AccordionItem({ question, answer }: { question: string; answer: string 
         className="overflow-hidden"
       >
         <div className="pb-8 pr-8 border-l-2 border-gold/40 pl-6 ml-1">
-          <p className="text-charcoal/70 text-[14px] font-body font-light leading-relaxed">
-            {answer}
-          </p>
+          <div 
+            className="text-charcoal/70 text-[14px] font-body font-light leading-relaxed prose-charcoal [&_p]:m-0"
+            {...(answer.includes('<') 
+              ? { dangerouslySetInnerHTML: { __html: answer } }
+              : { children: answer }
+            )}
+          />
         </div>
       </motion.div>
     </div>
