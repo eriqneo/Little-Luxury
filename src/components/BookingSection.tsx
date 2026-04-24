@@ -11,6 +11,8 @@ export default function BookingSection() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
+    name: "",
+    email: "",
     checkIn: "",
     checkOut: "",
     adults: "2",
@@ -21,6 +23,8 @@ export default function BookingSection() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
+    if (!formData.name) newErrors.name = "Required";
+    if (!formData.email) newErrors.email = "Required";
     if (!formData.checkIn) newErrors.checkIn = "Required";
     if (!formData.checkOut) newErrors.checkOut = "Required";
     setErrors(newErrors);
@@ -32,11 +36,17 @@ export default function BookingSection() {
     if (validate()) {
       try {
         await pb.collection('reservations').create({
-          check_in: formData.checkIn,
-          check_out: formData.checkOut,
-          status: 'pending', // Admins can confirm this later
-          guest_name: "Web Inquiry", // Optional, or prompt user
-          special_requests: `Adults: ${formData.adults}, Children: ${formData.children}, Room: ${formData.roomType}. ${formData.specialRequests}`
+          guest_name: formData.name,
+          guest_email: formData.email,
+          guest_phone: 'N/A', // fallback
+          check_in: formData.checkIn + " 12:00:00.000Z", // Ensure valid date if strict
+          check_out: formData.checkOut + " 12:00:00.000Z",
+          guests_adults: parseInt(formData.adults) || 2,
+          guests_children: parseInt(formData.children) || 0,
+          status: 'Pending', // Must be capitalized as per schema
+          special_requests: `Preferred Room: ${formData.roomType}. ${formData.specialRequests}`,
+          room: "", // Empty relation
+          total_amount: 0,
         });
         setIsSubmitted(true);
       } catch (err) {
@@ -121,6 +131,36 @@ export default function BookingSection() {
                 </h3>
                 
                 <form onSubmit={handleSubmit} className="space-y-10">
+                  {/* Row 0: Contact Info */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                    <div className="group">
+                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                        Full Name
+                      </label>
+                      <input 
+                        type="text"
+                        className={`w-full bg-transparent border-b ${errors.name ? 'border-gold' : 'border-gold/40'} text-ivory font-body font-light py-3 outline-none focus:border-gold transition-colors block appearance-none placeholder:text-white/20`}
+                        placeholder="John Doe"
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      />
+                      {errors.name && <span className="text-gold text-[10px] uppercase font-body mt-2 block">{errors.name}</span>}
+                    </div>
+                    <div className="group">
+                      <label className="block text-[11px] uppercase tracking-[0.25em] font-body font-light text-ivory/60 mb-2">
+                        Email Address
+                      </label>
+                      <input 
+                        type="email"
+                        className={`w-full bg-transparent border-b ${errors.email ? 'border-gold' : 'border-gold/40'} text-ivory font-body font-light py-3 outline-none focus:border-gold transition-colors block appearance-none placeholder:text-white/20`}
+                        placeholder="john@example.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      />
+                      {errors.email && <span className="text-gold text-[10px] uppercase font-body mt-2 block">{errors.email}</span>}
+                    </div>
+                  </div>
+
                   {/* Row 1: Dates */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                     <div className="group">
