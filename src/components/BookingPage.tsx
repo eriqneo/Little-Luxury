@@ -83,7 +83,7 @@ export default function BookingPage() {
   
   // Selection State
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [range, setRange] = useState<{ start: string | null; end: string | null }>({ start: null, end: null });
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [guests, setGuests] = useState({ adults: 2, children: 0 });
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -93,11 +93,7 @@ export default function BookingPage() {
 
   const selectedRoom = useMemo(() => rooms.find(r => r.id === selectedRoomId), [rooms, selectedRoomId]);
   
-  const nights = useMemo(() => {
-    if (!range.start || !range.end) return 0;
-    const diff = new Date(range.end).getTime() - new Date(range.start).getTime();
-    return Math.max(1, Math.round(diff / (1000 * 3600 * 24)));
-  }, [range]);
+  const nights = selectedDates.length || 0;
 
   const subtotal = selectedRoom ? selectedRoom.price * nights : 0;
   const vat = subtotal * 0.16;
@@ -112,10 +108,24 @@ export default function BookingPage() {
         ? booked
         : r.status === 'Pending' ? pending : null;
       if (!target) return;
-      const start = new Date(r.check_in);
-      const end = new Date(r.check_out);
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        target.add(d.toISOString().split('T')[0]);
+      let hasAlternateDates = false;
+      if (r.special_requests) {
+        const match = r.special_requests.match(/\[Dates: (.*?)\]/);
+        if (match) {
+          const dates = match[1].split(', ').filter(d => d);
+          if (dates.length > 0) {
+            hasAlternateDates = true;
+            dates.forEach(d => target.add(d));
+          }
+        }
+      }
+
+      if (!hasAlternateDates && r.check_in && r.check_out) {
+        const start = new Date(r.check_in);
+        const end = new Date(r.check_out);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          target.add(d.toISOString().split('T')[0]);
+        }
       }
     });
     return { bookedDays: booked, pendingDays: pending };
@@ -123,21 +133,25 @@ export default function BookingPage() {
 
   // Submit booking to PocketBase as a Pending reservation
   const handleSubmit = async () => {
-    if (!form.agreed || !form.email || !form.firstName || !selectedRoomId || !range.start || !range.end) return;
+    if (!form.agreed || !form.email || !form.firstName || !selectedRoomId || selectedDates.length === 0) return;
     setIsSubmitting(true);
     setSubmitError(null);
     try {
+      const sortedDates = [...selectedDates].sort();
+      const checkInStr = sortedDates[0];
+      const checkOutStr = sortedDates[sortedDates.length - 1];
+
       const record = await pb.collection('reservations').create({
         guest_name: `${form.firstName} ${form.lastName}`.trim(),
         guest_email: form.email,
         guest_phone: form.phone || 'N/A', // Add fallback to prevent validation failure
         room: selectedRoomId,
-        check_in: range.start + " 12:00:00.000Z", // Append strict time format
-        check_out: range.end + " 12:00:00.000Z",
+        check_in: checkInStr + " 12:00:00.000Z", // Append strict time format
+        check_out: checkOutStr + " 12:00:00.000Z",
         guests_adults: guests.adults || 1,
         guests_children: guests.children || 0,
         arrival_time: form.arrivalTime || '14:00',
-        special_requests: form.requests,
+        special_requests: `[Dates: ${sortedDates.join(', ')}]\n${form.requests}`,
         payment_method: form.payment || 'hotel',
         nationality: form.nationality || 'Kenyan',
         total_amount: total,
@@ -158,33 +172,20 @@ export default function BookingPage() {
   const handleDateClick = (dateStr: string) => {
     if (bookedDays.has(dateStr)) return; // Blocked
     
-    if (!range.start || (range.start && range.end)) {
-      setRange({ start: dateStr, end: null });
+    if (selectedDates.includes(dateStr)) {
+      setSelectedDates(selectedDates.filter(d => d !== dateStr));
     } else {
-      if (new Date(dateStr) < new Date(range.start)) {
-        setRange({ start: dateStr, end: range.start });
-      } else {
-        setRange({ ...range, end: dateStr });
-      }
+      setSelectedDates([...selectedDates, dateStr]);
     }
   };
 
-  const isSelected = (dateStr: string) => {
-    if (range.start === dateStr || range.end === dateStr) return true;
-    if (range.start && range.end) {
-      const d = new Date(dateStr).getTime();
-      const s = new Date(range.start).getTime();
-      const e = new Date(range.end).getTime();
-      if (d > s && d < e) return true;
-    }
-    return false;
-  };
+  const isSelected = (dateStr: string) => selectedDates.includes(dateStr);
 
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
 
   const nextStep = () => {
-    if (step === 1 && (!range.start || !range.end)) return;
+    if (step === 1 && selectedDates.length === 0) return;
     if (step === 2 && !selectedRoomId) return;
     setStep((prev) => (prev + 1) as Step);
     window.scrollTo({ top: 300, behavior: "smooth" });
@@ -278,11 +279,9 @@ export default function BookingPage() {
                                     onClick={() => !booked && handleDateClick(dateStr)}
                                     disabled={booked}
                                     title={booked ? 'Reserved' : pending ? 'Pending' : 'Available'}
-                                    className={`h-10 w-full flex items-center justify-center font-body text-[13px] transition-all relative
+                                    className={`h-10 w-full flex items-center justify-center font-body text-[13px] transition-all relative rounded-full
                                       ${booked ? "text-charcoal/20 line-through cursor-not-allowed bg-red-50/30" : pending && !selected ? "text-amber-600 bg-amber-50 hover:bg-gold/10" : "text-charcoal hover:bg-gold/10"}
                                       ${selected ? "bg-gold text-white hover:bg-gold border-none" : ""}
-                                      ${range.start === dateStr ? "rounded-l-full" : ""}
-                                      ${range.end === dateStr ? "rounded-r-full" : ""}
                                     `}
                                   >
                                     {day}

@@ -16,10 +16,25 @@ export default function AvailabilityCalendar() {
         ? confirmed
         : r.status === 'Pending' ? pending : null;
       if (!target) return;
-      const start = new Date(r.check_in);
-      const end = new Date(r.check_out);
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        target.add(d.toISOString().split('T')[0]);
+      
+      let hasAlternateDates = false;
+      if (r.special_requests) {
+        const match = r.special_requests.match(/\[Dates: (.*?)\]/);
+        if (match) {
+          const dates = match[1].split(', ').filter(d => d);
+          if (dates.length > 0) {
+            hasAlternateDates = true;
+            dates.forEach(d => target.add(d));
+          }
+        }
+      }
+
+      if (!hasAlternateDates && r.check_in && r.check_out) {
+        const start = new Date(r.check_in);
+        const end = new Date(r.check_out);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          target.add(d.toISOString().split('T')[0]);
+        }
       }
     });
     return { confirmedDates: confirmed, pendingDates: pending };
