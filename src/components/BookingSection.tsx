@@ -259,9 +259,14 @@ export default function BookingSection() {
                       onChange={(e) => setFormData({...formData, agreed: e.target.checked})}
                       className="mt-1 accent-gold cursor-pointer"
                     />
-                    <label htmlFor="agree-home" className="text-[12px] font-body font-light text-ivory/60 leading-relaxed cursor-pointer select-none">
-                      {settings?.booking_agreement_text || "I agree to the Little Luxury house rules and cancellation policy."}
-                    </label>
+                    <label 
+                      htmlFor="agree-home" 
+                      className="text-[12px] font-body font-light text-ivory/60 leading-relaxed cursor-pointer select-none prose-ivory [&_p]:m-0"
+                      {...(settings?.booking_agreement_text?.includes('<') 
+                        ? { dangerouslySetInnerHTML: { __html: settings.booking_agreement_text } }
+                        : { children: settings?.booking_agreement_text || "I agree to the Little Luxury house rules and cancellation policy." }
+                      )}
+                    />
                   </div>
 
                   <button 
