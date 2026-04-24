@@ -40,25 +40,25 @@ export default function Navbar() {
           : "bg-transparent py-8"
       }`}
     >
-      <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
+      <div className="container mx-auto px-4 md:px-8 flex items-center justify-between gap-4 min-w-0">
         {/* Branding */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <Logo className="transition-transform duration-500 group-hover:scale-110 shadow-lg border border-gold/30" />
-          <span className={`font-display font-semibold transition-colors duration-700 text-lg tracking-[0.15em] uppercase leading-none ${
+        <Link to="/" className="flex items-center gap-2 group flex-shrink-0 min-w-0">
+          <Logo className="transition-transform duration-500 group-hover:scale-110 shadow-lg border border-gold/30 flex-shrink-0" />
+          <span className={`font-display font-semibold transition-colors duration-700 tracking-[0.1em] uppercase leading-none truncate ${
             isScrolled ? "text-gold" : "text-ivory"
-          }`}>
+          }`} style={{ fontSize: 'clamp(0.8rem, 1.5vw, 1.1rem)' }}>
             {settings?.site_name || "Little Luxury"}
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center gap-8 xl:gap-12">
-          <div className="flex items-center gap-8">
+        <div className="hidden xl:flex items-center gap-4 2xl:gap-8 flex-shrink-0">
+          <div className="flex items-center gap-4 2xl:gap-8">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.name}
                 to={link.href}
-                className={`text-[13px] uppercase tracking-[0.18em] font-body font-light transition-colors duration-700 ${
+                className={`text-[11px] 2xl:text-[13px] uppercase tracking-[0.15em] font-body font-light transition-colors duration-700 whitespace-nowrap ${
                   location.pathname === link.href 
                     ? "text-gold" 
                     : isScrolled ? "text-charcoal hover:text-gold" : "text-ivory/80 hover:text-gold"
@@ -71,7 +71,7 @@ export default function Navbar() {
           
           <Link 
             to="/booking"
-            className={`px-6 py-2.5 border transition-all duration-700 text-[13px] uppercase tracking-[0.12em] font-body font-medium ${
+            className={`px-4 2xl:px-6 py-2 border transition-all duration-700 text-[11px] 2xl:text-[13px] uppercase tracking-[0.1em] font-body font-medium whitespace-nowrap ${
               isScrolled 
                 ? "border-gold text-gold hover:bg-gold hover:text-ivory" 
                 : "border-ivory/30 text-ivory hover:bg-ivory hover:text-espresso"
@@ -83,12 +83,12 @@ export default function Navbar() {
 
         {/* Mobile Hamburger Icon */}
         <button
-          className={`lg:hidden transition-colors duration-700 hover:opacity-80 ${
+          className={`xl:hidden transition-colors duration-700 hover:opacity-80 flex-shrink-0 ${
             isScrolled ? "text-gold" : "text-ivory"
           }`}
           onClick={() => setIsMobileMenuOpen(true)}
         >
-          <Menu size={28} />
+          <Menu size={26} />
         </button>
       </div>
 
