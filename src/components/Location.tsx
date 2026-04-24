@@ -28,12 +28,6 @@ export default function Location() {
     },
   ];
 
-  const defaultMap = "https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3988.4755982657825!2d36.95991517496623!3d-1.4865047984995294!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2s!5e0!3m2!1sen!2ske!4v1777045693761!5m2!1sen!2ske";
-  
-  // Validation: Only use the CMS URL if it actually looks like a Google Maps embed link
-  const mapSrc = (settings?.maps_embed_url && settings.maps_embed_url.includes('google.com/maps')) 
-    ? settings.maps_embed_url 
-    : defaultMap;
 
   return (
     <section id="contact" className="bg-ivory py-24 md:py-32 overflow-hidden">
@@ -44,7 +38,7 @@ export default function Location() {
             <FadeIn className="h-full w-full">
               <iframe
                 title="Google Maps Location"
-                src={mapSrc}
+                src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3988.4755982657825!2d36.95991517496623!3d-1.4865047984995294!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2s!5e0!3m2!1sen!2ske!4v1777045693761!5m2!1sen!2ske"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
