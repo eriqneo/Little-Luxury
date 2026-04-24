@@ -1,29 +1,34 @@
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook, Twitter } from "lucide-react";
 import FadeIn from "./FadeIn";
+import { useSiteSettings } from "../hooks/useSiteSettings";
 
 export default function Location() {
+  const { settings } = useSiteSettings();
+
   const contactDetails = [
     { 
       label: "Address", 
-      value: "15 Peponi Road, Westlands, Nairobi, Kenya", 
+      value: settings?.contact_address || "15 Peponi Road, Westlands, Nairobi, Kenya", 
       icon: MapPin 
     },
     { 
       label: "Phone", 
-      value: "+254 700 000 000", 
+      value: settings?.contact_phone || "+254 700 000 000", 
       icon: Phone 
     },
     { 
       label: "Email", 
-      value: "info@littleluxury.co.ke", 
+      value: settings?.contact_email || "info@littleluxury.co.ke", 
       icon: Mail 
     },
     { 
       label: "Check-in / Check-out", 
-      value: "2:00 PM | 11:00 AM", 
+      value: settings?.business_hours_reception || "2:00 PM | 11:00 AM", 
       icon: Clock 
     },
   ];
+
+  const defaultMap = "https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3988.4755982657825!2d36.95991517496623!3d-1.4865047984995294!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMcKwMjknMTEuNCJTIDM2wrA1Nyc0NS4wIkU!5e0!3m2!1sen!2ske!4v1776975895111!5m2!1sen!2ske";
 
   return (
     <section id="contact" className="bg-ivory py-24 md:py-32 overflow-hidden">
@@ -34,7 +39,7 @@ export default function Location() {
             <FadeIn className="h-full w-full">
               <iframe
                 title="Google Maps Location"
-                src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3988.4755982657825!2d36.95991517496623!3d-1.4865047984995294!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMcKwMjknMTEuNCJTIDM2wrA1Nyc0NS4wIkU!5e0!3m2!1sen!2ske!4v1776975895111!5m2!1sen!2ske"
+                src={settings?.maps_embed_url || defaultMap}
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -89,15 +94,26 @@ export default function Location() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center">
-                <button className="px-8 py-3.5 border border-gold text-gold text-[12px] uppercase tracking-[0.15em] font-body font-medium hover:bg-gold hover:text-ivory transition-all duration-500">
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings?.contact_address || "Little Luxury Nairobi")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-8 py-3.5 border border-gold text-gold text-[12px] uppercase tracking-[0.15em] font-body font-medium hover:bg-gold hover:text-ivory transition-all duration-500"
+                >
                   Get Directions →
-                </button>
+                </a>
 
                 <div className="flex items-center gap-6">
-                  {[Instagram, Facebook, Twitter].map((Icon, i) => (
-                    <a key={i} href="#" className="text-gold hover:text-espresso transition-colors">
-                      <Icon size={20} strokeWidth={1.5} />
-                    </a>
+                  {[
+                    { Icon: Instagram, url: settings?.instagram_url },
+                    { Icon: Facebook, url: settings?.facebook_url },
+                    { Icon: Twitter, url: settings?.tiktok_url } // Using twitter icon for tiktok or vice versa if needed
+                  ].map((social, i) => (
+                    social.url && (
+                      <a key={i} href={social.url} target="_blank" rel="noopener noreferrer" className="text-gold hover:text-espresso transition-colors">
+                        <social.Icon size={20} strokeWidth={1.5} />
+                      </a>
+                    )
                   ))}
                 </div>
               </div>
