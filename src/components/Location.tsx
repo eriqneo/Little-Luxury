@@ -23,7 +23,7 @@ export default function Location() {
     },
     { 
       label: "Check-in / Check-out", 
-      value: settings?.business_hours_reception || "2:00 PM | 11:00 AM", 
+      value: settings?.checkin_checkout || "2:00 PM | 11:00 AM", 
       icon: Clock 
     },
   ];

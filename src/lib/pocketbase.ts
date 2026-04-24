@@ -55,6 +55,7 @@ export interface SiteSettings {
   home_booking_title?: string;
   home_booking_text?: string;
   home_booking_bg?: string;
+  checkin_checkout?: string;
 }
 
 export interface Room {
