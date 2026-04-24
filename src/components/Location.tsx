@@ -28,7 +28,12 @@ export default function Location() {
     },
   ];
 
-  const defaultMap = "https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3988.4755982657825!2d36.95991517496623!3d-1.4865047984995294!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMcKwMjknMTEuNCJTIDM2wrA1Nyc0NS4wIkU!5e0!3m2!1sen!2ske!4v1776975895111!5m2!1sen!2ske";
+  const defaultMap = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.8504543169085!2d36.80486827566164!3d-1.2620404987258384!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f173c3a1192d3%3A0x67300a4d4681333f!2sPeponi%20Rd%2C%20Nairobi!5e0!3m2!1sen!2ske!4v1713977000000!5m2!1sen!2ske";
+  
+  // Validation: Only use the CMS URL if it actually looks like a Google Maps embed link
+  const mapSrc = (settings?.maps_embed_url && settings.maps_embed_url.includes('google.com/maps')) 
+    ? settings.maps_embed_url 
+    : defaultMap;
 
   return (
     <section id="contact" className="bg-ivory py-24 md:py-32 overflow-hidden">
@@ -39,14 +44,14 @@ export default function Location() {
             <FadeIn className="h-full w-full">
               <iframe
                 title="Google Maps Location"
-                src={settings?.maps_embed_url || defaultMap}
+                src={mapSrc}
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="grayscale opacity-80"
+                className="opacity-90"
               />
               {/* Custom Gold Pin Overlay (Centered in Map) */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
