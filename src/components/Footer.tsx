@@ -165,7 +165,12 @@ export default function Footer() {
               </div>
               
               <div className="pt-4">
-                <a href="#contact" className="text-gold text-[13px] font-body font-medium border-b border-gold/40 pb-1 hover:border-gold transition-all">
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings?.contact_address || "Little Luxury Nairobi")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gold text-[13px] font-body font-medium border-b border-gold/40 pb-1 hover:border-gold transition-all"
+                >
                   View on Map
                 </a>
                 <p className="text-ivory/40 text-[13px] font-body font-light mt-6">
