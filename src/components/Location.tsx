@@ -28,7 +28,7 @@ export default function Location() {
     },
   ];
 
-  const defaultMap = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.8504543169085!2d36.80486827566164!3d-1.2620404987258384!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f173c3a1192d3%3A0x67300a4d4681333f!2sPeponi%20Rd%2C%20Nairobi!5e0!3m2!1sen!2ske!4v1713977000000!5m2!1sen!2ske";
+  const defaultMap = "https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3988.4755982657825!2d36.95991517496623!3d-1.4865047984995294!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2s!5e0!3m2!1sen!2ske!4v1777045693761!5m2!1sen!2ske";
   
   // Validation: Only use the CMS URL if it actually looks like a Google Maps embed link
   const mapSrc = (settings?.maps_embed_url && settings.maps_embed_url.includes('google.com/maps')) 
