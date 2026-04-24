@@ -3,6 +3,7 @@ import { useRef, useState, useMemo } from "react";
 import FadeIn from "./FadeIn";
 import { useTestimonials } from "../hooks/useTestimonials";
 import { Testimonial } from "../lib/pocketbase";
+import { Link } from "react-router-dom";
 
 function TestimonialCard({ t }: { t: Testimonial }) {
   return (
