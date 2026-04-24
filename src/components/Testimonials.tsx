@@ -96,10 +96,19 @@ export default function Testimonials() {
         </motion.div>
       </div>
 
-      <div className="mt-16 flex items-center justify-center gap-3">
-        <div className="w-24 h-[1px] bg-gold/30" />
-        <span className="text-[10px] uppercase font-body tracking-[0.3em] text-gold/60">Verified Experiences</span>
-        <div className="w-24 h-[1px] bg-gold/30" />
+      <div className="mt-16 flex flex-col items-center gap-12">
+        <Link
+          to="/survey"
+          className="text-gold text-[12px] uppercase tracking-[0.2em] font-body font-medium border-b border-gold/40 pb-1 hover:border-gold transition-all"
+        >
+          Share Your Experience →
+        </Link>
+
+        <div className="flex items-center justify-center gap-3">
+          <div className="w-24 h-[1px] bg-gold/30" />
+          <span className="text-[10px] uppercase font-body tracking-[0.3em] text-gold/60">Verified Experiences</span>
+          <div className="w-24 h-[1px] bg-gold/30" />
+        </div>
       </div>
     </section>
   );

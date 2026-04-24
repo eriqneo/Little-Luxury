@@ -115,10 +115,17 @@ export default function Footer() {
               Explore
             </h4>
             <div className="flex flex-col gap-3">
-              {["Home", "About Us", "Our Rooms", "Amenities", "Gallery", "Contact"].map((item) => (
+              {["Home", "About Us", "Our Rooms", "Amenities", "Gallery", "Contact", "Leave a Review"].map((item) => (
                 <Link
                   key={item}
-                  to={item === "Home" ? "/" : item === "About Us" ? "/about" : item === "Our Rooms" ? "/rooms" : item === "Contact" ? "/contact" : "#"}
+                  to={
+                    item === "Home" ? "/" : 
+                    item === "About Us" ? "/about" : 
+                    item === "Our Rooms" ? "/rooms" : 
+                    item === "Contact" ? "/contact" : 
+                    item === "Leave a Review" ? "/survey" : 
+                    "#"
+                  }
                   className="text-ivory/70 text-[14px] font-body font-light hover:text-gold transition-colors duration-300 w-fit"
                 >
                   {item}

@@ -19,6 +19,7 @@ import BookingPage from "./components/BookingPage";
 import AboutPage from "./components/AboutPage";
 import ContactPage from "./components/ContactPage";
 import GalleryPage from "./components/GalleryPage";
+import SurveyPage from "./components/SurveyPage";
 
 function HomePage() {
   return (
@@ -88,6 +89,7 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/survey" element={<SurveyPage />} />
       </Routes>
     </Router>
   );
