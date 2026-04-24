@@ -95,6 +95,15 @@ export default function BookingPage() {
   
   const nights = selectedDates.length || 0;
 
+  const sortedDates = [...selectedDates].sort();
+  const checkInDateStr = sortedDates[0] || "";
+  const checkOutDateStr = sortedDates[sortedDates.length - 1] || "";
+
+  const formatSummaryDate = (dStr: string) => {
+    if (!dStr) return "---";
+    return new Date(dStr).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
   const subtotal = selectedRoom ? selectedRoom.price * nights : 0;
   const vat = subtotal * 0.16;
   const total = subtotal + vat;
@@ -350,9 +359,9 @@ export default function BookingPage() {
 
                       <button 
                         onClick={nextStep}
-                        disabled={!range.start || !range.end}
+                        disabled={selectedDates.length === 0}
                         className={`w-full py-5 text-[13px] uppercase tracking-[0.2em] font-body transition-all duration-500
-                          ${range.start && range.end ? "bg-gold text-ivory hover:bg-gold-mid shadow-xl" : "bg-gold-muted/30 text-gold-muted cursor-not-allowed"}
+                          ${selectedDates.length > 0 ? "bg-gold text-ivory hover:bg-gold-mid shadow-xl" : "bg-gold-muted/30 text-gold-muted cursor-not-allowed"}
                         `}
                       >
                         Check Availability →
@@ -428,11 +437,11 @@ export default function BookingPage() {
                     <div className="space-y-6 mb-10">
                       <div className="flex justify-between border-b border-gold/10 pb-4">
                         <span className="text-ivory/60 text-[13px] font-body">Check-in</span>
-                        <span className="text-ivory text-[13px] font-body">April {range.start}, 2026</span>
+                        <span className="text-ivory text-[13px] font-body">{formatSummaryDate(checkInDateStr)}</span>
                       </div>
                       <div className="flex justify-between border-b border-gold/10 pb-4">
                         <span className="text-ivory/60 text-[13px] font-body">Check-out</span>
-                        <span className="text-ivory text-[13px] font-body">April {range.end}, 2026</span>
+                        <span className="text-ivory text-[13px] font-body">{formatSummaryDate(checkOutDateStr)}</span>
                       </div>
                       <div className="flex justify-between border-b border-gold/10 pb-4">
                         <span className="text-ivory/60 text-[13px] font-body">Nights</span>
@@ -605,12 +614,12 @@ export default function BookingPage() {
                       <div className="grid grid-cols-2 gap-8 border-y border-white/10 py-8">
                         <div>
                           <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Arrival</p>
-                          <p className="text-[15px] font-body">{range.start} April, 2026</p>
+                          <p className="text-[15px] font-body">{formatSummaryDate(checkInDateStr)}</p>
                           <p className="text-[11px] text-ivory/40 mt-1">From 2:00 PM</p>
                         </div>
                         <div>
                           <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Departure</p>
-                          <p className="text-[15px] font-body">{range.end} April, 2026</p>
+                          <p className="text-[15px] font-body">{formatSummaryDate(checkOutDateStr)}</p>
                           <p className="text-[11px] text-ivory/40 mt-1">By 11:00 AM</p>
                         </div>
                       </div>
