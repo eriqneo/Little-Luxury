@@ -289,8 +289,8 @@ export default function BookingPage() {
                                     disabled={booked}
                                     title={booked ? 'Reserved' : pending ? 'Pending' : 'Available'}
                                     className={`h-10 w-full flex items-center justify-center font-body text-[13px] transition-all relative rounded-full
-                                      ${booked ? "text-charcoal/20 line-through cursor-not-allowed bg-red-50/30" : pending && !selected ? "text-amber-600 bg-amber-50 hover:bg-gold/10" : "text-charcoal hover:bg-gold/10"}
-                                      ${selected ? "bg-gold text-white hover:bg-gold border-none" : ""}
+                                      ${booked ? "bg-red-500 text-white cursor-not-allowed shadow-inner" : pending && !selected ? "bg-amber-400 text-charcoal hover:bg-amber-500" : "text-charcoal hover:bg-gold/10"}
+                                      ${selected ? "bg-gold text-white hover:bg-gold border-none z-10 scale-110 shadow-lg" : ""}
                                     `}
                                   >
                                     {day}
@@ -306,11 +306,11 @@ export default function BookingPage() {
                     {/* Legend */}
                     <div className="mt-8 flex items-center gap-6 pt-6 border-t border-gold/10 flex-wrap">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-100 rounded-sm line-through text-charcoal/20 flex items-center justify-center text-[8px] border border-red-200">-</div>
+                        <div className="w-3 h-3 bg-red-500 rounded-sm shadow-sm" />
                         <span className="text-[10px] uppercase tracking-wider text-charcoal/60 font-body">Reserved</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-amber-100 rounded-sm border border-amber-200" />
+                        <div className="w-3 h-3 bg-amber-400 rounded-sm shadow-sm" />
                         <span className="text-[10px] uppercase tracking-wider text-charcoal/60 font-body">Pending</span>
                       </div>
                       <div className="flex items-center gap-2">
