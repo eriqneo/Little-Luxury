@@ -130,16 +130,16 @@ export default function BookingPage() {
       const record = await pb.collection('reservations').create({
         guest_name: `${form.firstName} ${form.lastName}`.trim(),
         guest_email: form.email,
-        guest_phone: form.phone,
+        guest_phone: form.phone || 'N/A', // Add fallback to prevent validation failure
         room: selectedRoomId,
-        check_in: dayToISO(range.start),
-        check_out: dayToISO(range.end),
-        guests_adults: guests.adults,
-        guests_children: guests.children,
-        arrival_time: form.arrivalTime,
+        check_in: dayToISO(range.start) + " 12:00:00.000Z", // Append strict time format
+        check_out: dayToISO(range.end) + " 12:00:00.000Z",
+        guests_adults: guests.adults || 1,
+        guests_children: guests.children || 0,
+        arrival_time: form.arrivalTime || '14:00',
         special_requests: form.requests,
-        payment_method: form.payment,
-        nationality: form.nationality,
+        payment_method: form.payment || 'hotel',
+        nationality: form.nationality || 'Kenyan',
         total_amount: total,
         status: 'Pending',  // Admin will change to Booked to block the calendar
         notes: '',
