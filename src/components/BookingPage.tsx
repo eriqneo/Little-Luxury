@@ -88,7 +88,7 @@ export default function BookingPage() {
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "", nationality: "Kenyan", 
-    arrivalTime: "14:00", requests: "", payment: "hotel", agreed: false
+    arrivalTime: "14:00", requests: "", agreed: false
   });
 
   const selectedRoom = useMemo(() => rooms.find(r => r.id === selectedRoomId), [rooms, selectedRoomId]);
@@ -166,7 +166,7 @@ export default function BookingPage() {
         guests_children: guests.children || 0,
         arrival_time: form.arrivalTime || '14:00',
         special_requests: `[Dates: ${sortedDates.join(', ')}]\n${form.requests}`,
-        payment_method: form.payment || 'hotel',
+        payment_method: 'Pending',
         nationality: form.nationality || 'Kenyan',
         total_amount: total,
         status: 'Pending',  // Admin will change to Booked to block the calendar
@@ -533,25 +533,7 @@ export default function BookingPage() {
                       </div>
                     </div>
 
-                    <h3 className="text-2xl font-display italic mb-10">Payment Method</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
-                      {["hotel", "online", "deposit"].map(m => (
-                        <div 
-                          key={m}
-                          onClick={() => setForm({...form, payment: m})}
-                          className={`p-6 border-2 cursor-pointer transition-all duration-300 text-center
-                            ${form.payment === m ? "border-gold bg-gold/5" : "border-gold/10 hover:border-gold/30"}
-                          `}
-                        >
-                          <div className={`w-4 h-4 rounded-full border border-gold mx-auto mb-4 flex items-center justify-center p-0.5`}>
-                            {form.payment === m && <div className="w-full h-full bg-gold rounded-full" />}
-                          </div>
-                          <p className="text-[11px] uppercase tracking-widest font-body text-charcoal">
-                            {m === "hotel" ? "Pay at Hotel" : m === "online" ? "Pay Online" : "Pay Deposit"}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+
 
                     <div className="flex items-start gap-4 mb-12">
                       <input type="checkbox" id="terms" checked={form.agreed} onChange={e => setForm({...form, agreed: e.target.checked})} className="mt-1 accent-gold cursor-pointer" />
