@@ -651,7 +651,7 @@ export default function BookingPage() {
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-widest leading-none mb-1">Support Line</p>
-                        <p className="text-[13px] font-body text-gold">+254 700 000 000</p>
+                        <p className="text-[13px] font-body text-gold">{settings?.contact_phone || '+254 700 000 000'}</p>
                       </div>
                     </div>
                   </div>
