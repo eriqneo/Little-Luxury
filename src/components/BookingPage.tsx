@@ -300,6 +300,12 @@ export default function BookingPage() {
                             <p className="text-2xl font-display text-gold italic">KSh {room.price.toLocaleString()}</p>
                           </div>
                           <button 
+                            onClick={(e) => {
+                              if (selectedRoomId === room.id) {
+                                e.stopPropagation();
+                                nextStep();
+                              }
+                            }}
                             className={`px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-body transition-all duration-300
                               ${selectedRoomId === room.id ? "bg-gold text-white" : "border border-gold text-gold hover:bg-gold hover:text-white"}
                             `}
