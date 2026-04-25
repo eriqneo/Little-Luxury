@@ -71,11 +71,33 @@ export default function ContactPage() {
   const { settings, loading: settingsLoading } = useSiteSettings();
   const { faqs, loading: faqsLoading } = useFaqs();
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [message, setMessage] = useState("");
   const maxMessageLength = 500;
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "General Enquiry",
+    message: ""
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Construct the WhatsApp message
+    const whatsappNumber = "447872625973";
+    const text = `*New Inquiry from Little Luxury Website*\n\n` +
+                 `*Name:* ${formData.name}\n` +
+                 `*Email:* ${formData.email}\n` +
+                 `*Phone:* ${formData.phone || 'N/A'}\n` +
+                 `*Subject:* ${formData.subject}\n\n` +
+                 `*Message:*\n${formData.message}`;
+    
+    const encodedText = encodeURIComponent(text);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedText}`;
+    
+    // Open WhatsApp in a new tab
+    window.open(whatsappUrl, '_blank');
+    
     setIsSubmitted(true);
   };
 
@@ -164,22 +186,43 @@ export default function ContactPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
                           <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Full Name</label>
-                          <input required type="text" className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors" />
+                          <input 
+                            required 
+                            type="text" 
+                            value={formData.name}
+                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors" 
+                          />
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Email Address</label>
-                          <input required type="email" className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors" />
+                          <input 
+                            required 
+                            type="email" 
+                            value={formData.email}
+                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors" 
+                          />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
                           <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Phone</label>
-                          <input type="tel" className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors" />
+                          <input 
+                            type="tel" 
+                            value={formData.phone}
+                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                            className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors" 
+                          />
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] uppercase tracking-widest text-charcoal/80 font-body font-medium">Subject</label>
-                          <select className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors">
+                          <select 
+                            value={formData.subject}
+                            onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                            className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors"
+                          >
                             <option>General Enquiry</option>
                             <option>Room Reservation</option>
                             <option>Special Occasion</option>
@@ -195,13 +238,13 @@ export default function ContactPage() {
                           required
                           rows={5}
                           maxLength={maxMessageLength}
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
+                          value={formData.message}
+                          onChange={(e) => setFormData({...formData, message: e.target.value})}
                           className="w-full bg-transparent border-b border-gold/20 py-3 font-body text-[15px] outline-none focus:border-gold transition-colors resize-none"
                           placeholder="Tell us how we can help..."
                         />
                         <div className="absolute bottom-[-24px] right-0 text-[10px] font-body text-charcoal/30">
-                          {message.length} / {maxMessageLength} characters
+                          {formData.message.length} / {maxMessageLength} characters
                         </div>
                       </div>
 
