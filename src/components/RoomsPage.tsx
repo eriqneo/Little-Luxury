@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import FadeIn from "./FadeIn";
@@ -9,6 +10,7 @@ import { getFileUrl } from "../lib/pocketbase";
 const CATEGORIES = ["All Rooms", "Standard", "Deluxe", "Suite", "Residence"];
 
 export default function RoomsPage() {
+  const navigate = useNavigate();
   const { rooms, loading: roomsLoading } = useRooms();
   const { settings, loading: settingsLoading } = useSiteSettings();
   const [activeFilter, setActiveFilter] = useState("All Rooms");
@@ -147,7 +149,10 @@ export default function RoomsPage() {
                           <div className="text-charcoal text-2xl font-display italic mb-6">
                             KSh {room.price.toLocaleString()} <span className="text-xs not-italic opacity-50 uppercase tracking-widest ml-1">/ Night</span>
                           </div>
-                          <button className="px-10 py-4 bg-gold text-ivory text-[13px] uppercase tracking-[0.15em] font-body font-medium hover:bg-espresso transition-all duration-500 shadow-lg">
+                          <button 
+                            onClick={() => navigate(`/booking?room=${room.id}`)}
+                            className="px-10 py-4 bg-gold text-ivory text-[13px] uppercase tracking-[0.15em] font-body font-medium hover:bg-espresso transition-all duration-500 shadow-lg"
+                          >
                             Book This Room
                           </button>
                         </div>

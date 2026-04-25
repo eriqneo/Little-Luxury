@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Check, 
@@ -48,20 +48,27 @@ const StepIndicator = ({ currentStep }: { currentStep: Step }) => {
                 currentStep > s.num 
                   ? "bg-gold border-gold text-ivory" 
                   : currentStep === s.num 
-                  ? "bg-gold border-gold text-ivory scale-110" 
-                  : "bg-transparent border-gold/30 text-gold/50"
+                  ? "border-gold text-gold scale-110 shadow-[0_0_20px_rgba(197,160,103,0.3)]"
+                  : "border-charcoal/10 text-charcoal/30"
               }`}
             >
               {currentStep > s.num ? <Check size={16} /> : s.num}
             </div>
-            <span className={`absolute top-full mt-3 text-[10px] uppercase tracking-[0.2em] font-body whitespace-nowrap transition-colors duration-500 ${
-              currentStep >= s.num ? "text-gold" : "text-gold/40"
+            <span className={`absolute top-14 text-[10px] uppercase tracking-widest whitespace-nowrap transition-colors duration-500 ${
+              currentStep === s.num ? "text-gold font-medium" : "text-charcoal/30"
             }`}>
               {s.label}
             </span>
           </div>
           {i < steps.length - 1 && (
-            <div className="flex-1 h-[1px] bg-gold/20 mx-4" />
+            <div className="w-20 md:w-32 h-[1px] bg-charcoal/10 mx-4 mt-[-10px]">
+              <motion.div 
+                className="h-full bg-gold"
+                initial={{ width: 0 }}
+                animate={{ width: currentStep > s.num ? "100%" : "0%" }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
           )}
         </React.Fragment>
       ))}
@@ -72,6 +79,8 @@ const StepIndicator = ({ currentStep }: { currentStep: Step }) => {
 // --- Page Component ---
 
 export default function BookingPage() {
+  const [searchParams] = useSearchParams();
+  const roomParam = searchParams.get('room');
   const { rooms, loading: roomsLoading } = useRooms();
   const { reservations, loading: reservationsLoading } = useReservations(); // live from CMS
   const { settings, loading: settingsLoading } = useSiteSettings();
@@ -90,6 +99,17 @@ export default function BookingPage() {
     firstName: "", lastName: "", email: "", phone: "", nationality: "Kenyan", 
     arrivalTime: "14:00", requests: "", agreed: false
   });
+
+  // Handle room pre-selection from URL
+  useEffect(() => {
+    if (roomParam && rooms.length > 0) {
+      const exists = rooms.some(r => r.id === roomParam);
+      if (exists) {
+        setSelectedRoomId(roomParam);
+        setStep(2);
+      }
+    }
+  }, [roomParam, rooms]);
 
   const selectedRoom = useMemo(() => rooms.find(r => r.id === selectedRoomId), [rooms, selectedRoomId]);
   
