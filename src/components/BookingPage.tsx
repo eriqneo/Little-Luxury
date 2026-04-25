@@ -105,8 +105,7 @@ export default function BookingPage() {
   };
 
   const subtotal = selectedRoom ? selectedRoom.price * nights : 0;
-  const vat = subtotal * 0.16;
-  const total = subtotal + vat;
+  const total = subtotal;
 
   // Build set of booked/pending day strings from live CMS reservations — FILTERED BY ROOM
   const { bookedDays, pendingDays } = useMemo(() => {
@@ -626,10 +625,7 @@ export default function BookingPage() {
                           <p className="text-ivory/50 text-[13px] font-body">{nights} Night Stay (x{guests.adults} Adults)</p>
                           <p className="text-[14px] font-body">KSh {subtotal.toLocaleString()}</p>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <p className="text-ivory/50 text-[13px] font-body">Taxes & Fees</p>
-                          <p className="text-[14px] font-body">KSh {vat.toLocaleString()}</p>
-                        </div>
+
                         <div className="flex justify-between items-center pt-4 border-t border-white/10">
                           <p className="text-gold text-[12px] uppercase tracking-[0.2em] font-body">Total Amount</p>
                           <p className="text-2xl font-display text-gold italic underline decoration-gold/30 underline-offset-8">KSh {total.toLocaleString()}</p>
