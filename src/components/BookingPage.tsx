@@ -33,8 +33,8 @@ type Step = 1 | 2 | 3;
 
 const StepIndicator = ({ currentStep }: { currentStep: Step }) => {
   const steps = [
-    { num: 1, label: "Choose Dates" },
-    { num: 2, label: "Select Room" },
+    { num: 1, label: "Select Room" },
+    { num: 2, label: "Choose Dates" },
     { num: 3, label: "Your Details" },
   ];
 
@@ -108,11 +108,17 @@ export default function BookingPage() {
   const vat = subtotal * 0.16;
   const total = subtotal + vat;
 
-  // Build set of booked/pending day strings from live CMS reservations
+  // Build set of booked/pending day strings from live CMS reservations — FILTERED BY ROOM
   const { bookedDays, pendingDays } = useMemo(() => {
     const booked = new Set<string>();
     const pending = new Set<string>();
-    reservations.forEach(r => {
+
+    // ONLY consider reservations for the selected room
+    const relevantReservations = selectedRoomId 
+      ? reservations.filter(r => r.room === selectedRoomId)
+      : [];
+
+    relevantReservations.forEach(r => {
       const target = (r.status === 'Booked' || r.status === 'Maintenance' || r.status === 'Closed')
         ? booked
         : r.status === 'Pending' ? pending : null;
@@ -138,7 +144,7 @@ export default function BookingPage() {
       }
     });
     return { bookedDays: booked, pendingDays: pending };
-  }, [reservations]);
+  }, [reservations, selectedRoomId]);
 
   // Submit booking to PocketBase as a Pending reservation
   const handleSubmit = async () => {
@@ -194,8 +200,8 @@ export default function BookingPage() {
   const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
 
   const nextStep = () => {
-    if (step === 1 && selectedDates.length === 0) return;
-    if (step === 2 && !selectedRoomId) return;
+    if (step === 1 && !selectedRoomId) return;
+    if (step === 2 && selectedDates.length === 0) return;
     setStep((prev) => (prev + 1) as Step);
     window.scrollTo({ top: 300, behavior: "smooth" });
   };
@@ -234,20 +240,109 @@ export default function BookingPage() {
 
         <div className="container mx-auto max-w-[1200px]">
           <AnimatePresence mode="wait">
-            {/* STEP 1 */}
+            {/* STEP 1: Room Selection */}
             {step === 1 && (
               <motion.div 
                 key="step1"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-8"
+              >
+                <div className="text-center mb-16">
+                  <h3 className="text-charcoal text-3xl font-display italic mb-4">Step 1: Choose Your Sanctuary</h3>
+                  <p className="text-charcoal/50 font-body text-[15px] max-w-lg mx-auto">
+                    Select the room that resonates with your vision of luxury. Availability will be shown in the next step.
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {rooms.map((room) => (
+                    <div 
+                      key={room.id}
+                      onClick={() => {
+                        setSelectedRoomId(room.id);
+                        // Reset dates if room changes, as availability is room-specific
+                        if (selectedRoomId !== room.id) setSelectedDates([]);
+                      }}
+                      className={`flex flex-col bg-white overflow-hidden cursor-pointer group transition-all duration-500 border-2 relative
+                        ${selectedRoomId === room.id ? "border-gold shadow-2xl" : "border-transparent hover:border-gold/30 hover:shadow-xl"}
+                      `}
+                    >
+                      <div className="relative h-64 overflow-hidden">
+                        <img src={getFileUrl(room, room.image, '600x400')} alt={room.name} className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" referrerPolicy="no-referrer" />
+                        {selectedRoomId === room.id && (
+                          <div className="absolute top-4 left-4 bg-gold text-ivory text-[10px] uppercase font-body px-3 py-1 tracking-widest flex items-center gap-1.5 shadow-lg">
+                            <Check size={10} /> Selected
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                           <p className="text-gold text-[10px] uppercase tracking-[0.3em] font-body mb-1">{room.type_label}</p>
+                           <h3 className="text-white text-xl font-display">{room.name}</h3>
+                        </div>
+                      </div>
+                      <div className="p-8 flex-1 flex flex-col justify-between">
+                        <div className="mb-6">
+                          <p className="text-charcoal/60 text-[13px] font-body leading-relaxed mb-6 line-clamp-2">
+                             {room.description?.replace(/<[^>]*>/g, '')}
+                          </p>
+                          <div className="flex flex-wrap gap-x-6 gap-y-3">
+                            {room.amenities?.slice(0, 3).map(f => (
+                              <span key={f} className="text-charcoal/50 text-[11px] font-body flex items-center gap-2 whitespace-nowrap uppercase tracking-wider">
+                                <span className="w-1 h-1 rounded-full bg-gold/50" /> {f}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-end justify-between border-t border-gold/10 pt-6">
+                          <div>
+                            <p className="text-charcoal/40 text-[10px] uppercase font-body mb-1">From</p>
+                            <p className="text-2xl font-display text-gold italic">KSh {room.price.toLocaleString()}</p>
+                          </div>
+                          <button 
+                            className={`px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-body transition-all duration-300
+                              ${selectedRoomId === room.id ? "bg-gold text-white" : "border border-gold text-gold hover:bg-gold hover:text-white"}
+                            `}
+                          >
+                            {selectedRoomId === room.id ? "Continue" : "Select"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-center mt-16">
+                   <button 
+                    onClick={nextStep}
+                    disabled={!selectedRoomId}
+                    className={`px-16 py-5 text-[13px] uppercase tracking-[0.2em] font-body transition-all duration-500
+                      ${selectedRoomId ? "bg-gold text-ivory hover:bg-gold-mid shadow-2xl" : "bg-gold-muted/30 text-gold-muted cursor-not-allowed"}
+                    `}
+                  >
+                    Select Dates →
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* STEP 2: Date Selection */}
+            {step === 2 && (
+              <motion.div 
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
                 className="bg-white p-8 md:p-16 shadow-sm border border-gold/5"
               >
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
                   {/* Calendar Widget */}
                   <div>
                     <div className="flex items-center justify-between mb-8">
-                      <h3 className="text-charcoal text-2xl font-display italic">Select Your Dates</h3>
+                      <div>
+                        <h3 className="text-charcoal text-2xl font-display italic">Choose Your Dates</h3>
+                        <p className="text-gold text-[10px] uppercase tracking-widest mt-1">FOR {selectedRoom?.name}</p>
+                      </div>
                       <div className="flex gap-4">
                         <button onClick={prevMonth} className="text-gold hover:text-charcoal transition-colors"><ChevronLeft /></button>
                         <button onClick={nextMonth} className="text-gold hover:text-charcoal transition-colors"><ChevronRight /></button>
@@ -318,14 +413,14 @@ export default function BookingPage() {
                     </div>
                   </div>
 
-                  {/* Guests & Promo */}
+                  {/* Guests & Summary */}
                   <div className="flex flex-col justify-center">
                     <div className="space-y-12 max-w-sm mx-auto w-full">
                       <div className="space-y-8">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-charcoal font-display text-lg mb-1">Adults</p>
-                            <p className="text-charcoal/40 text-[11px] uppercase tracking-wider uppercase">Age 12+</p>
+                            <p className="text-charcoal/40 text-[11px] uppercase tracking-wider">Age 12+</p>
                           </div>
                           <div className="flex items-center gap-6">
                             <button onClick={() => setGuests({...guests, adults: Math.max(1, guests.adults - 1)})} className="text-gold"><Minus size={18} /></button>
@@ -336,7 +431,7 @@ export default function BookingPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-charcoal font-display text-lg mb-1">Children</p>
-                            <p className="text-charcoal/40 text-[11px] uppercase tracking-wider uppercase">Age 0-11</p>
+                            <p className="text-charcoal/40 text-[11px] uppercase tracking-wider">Age 0-11</p>
                           </div>
                           <div className="flex items-center gap-6">
                             <button onClick={() => setGuests({...guests, children: Math.max(0, guests.children - 1)})} className="text-gold"><Minus size={18} /></button>
@@ -346,148 +441,41 @@ export default function BookingPage() {
                         </div>
                       </div>
 
-                      <div className="relative">
-                        <input 
-                          type="text" 
-                          placeholder="PROMO CODE"
-                          className="w-full bg-transparent border-b border-gold/30 py-3 text-[12px] uppercase tracking-[0.2em] font-body outline-none focus:border-gold pr-16"
-                        />
-                        <button className="absolute right-0 top-1/2 -translate-y-1/2 text-gold text-[11px] uppercase font-body font-semibold">Apply</button>
+                      <div className="bg-gold/5 p-6 space-y-4">
+                         <div className="flex justify-between text-[13px]">
+                            <span className="font-body text-charcoal/50 uppercase tracking-widest">Nights</span>
+                            <span className="font-display italic text-gold">{nights}</span>
+                         </div>
+                         <div className="flex justify-between text-[13px] border-t border-gold/10 pt-4">
+                            <span className="font-body text-charcoal/50 uppercase tracking-widest">Est. Total</span>
+                            <span className="font-display italic text-gold">KSh {total.toLocaleString()}</span>
+                         </div>
                       </div>
 
-                      <button 
-                        onClick={nextStep}
-                        disabled={selectedDates.length === 0}
-                        className={`w-full py-5 text-[13px] uppercase tracking-[0.2em] font-body transition-all duration-500
-                          ${selectedDates.length > 0 ? "bg-gold text-ivory hover:bg-gold-mid shadow-xl" : "bg-gold-muted/30 text-gold-muted cursor-not-allowed"}
-                        `}
-                      >
-                        Check Availability →
-                      </button>
+                      <div className="space-y-4">
+                        <button 
+                          onClick={nextStep}
+                          disabled={selectedDates.length === 0}
+                          className={`w-full py-5 text-[13px] uppercase tracking-[0.2em] font-body transition-all duration-500
+                            ${selectedDates.length > 0 ? "bg-gold text-ivory hover:bg-gold-mid shadow-xl" : "bg-gold-muted/30 text-gold-muted cursor-not-allowed"}
+                          `}
+                        >
+                          Confirm Details →
+                        </button>
+                        <button 
+                          onClick={() => setStep(1)}
+                          className="w-full py-4 text-[11px] uppercase tracking-[0.2em] font-body text-charcoal/40 hover:text-gold transition-colors"
+                        >
+                          ← Back to Room Selection
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </motion.div>
             )}
 
-            {/* STEP 2 */}
-            {step === 2 && (
-              <motion.div 
-                key="step2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-12"
-              >
-                <div className="lg:col-span-2 space-y-8">
-                  {roomsLoading ? (
-                    <div className="text-gold text-sm uppercase tracking-widest animate-pulse py-20 text-center">Loading Rooms...</div>
-                  ) : rooms.map((room) => (
-                    <div 
-                      key={room.id}
-                      onClick={() => setSelectedRoomId(room.id)}
-                      className={`flex flex-col md:flex-row bg-white overflow-hidden cursor-pointer group transition-all duration-500 border-2 
-                        ${selectedRoomId === room.id ? "border-gold" : "border-transparent hover:border-gold/30"}
-                      `}
-                    >
-                      <div className="md:w-2/5 relative h-64 md:h-auto overflow-hidden">
-                        <img src={getFileUrl(room, room.image, '600x400')} alt={room.name} className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" referrerPolicy="no-referrer" />
-                        {selectedRoomId === room.id && (
-                          <div className="absolute top-4 left-4 bg-gold text-ivory text-[10px] uppercase font-body px-3 py-1 tracking-widest flex items-center gap-1.5 shadow-lg">
-                            <Check size={10} /> Selected
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-8 md:p-10 flex-1 flex flex-col justify-between">
-                        <div>
-                          <span className="text-gold text-[10px] uppercase tracking-[0.3em] font-body mb-2 block">{room.type_label}</span>
-                          <h3 className="text-2xl font-display mb-4">{room.name}</h3>
-                          <div className="flex flex-wrap gap-x-6 gap-y-3 mb-6">
-                            {room.amenities?.slice(0, 4).map(f => (
-                              <span key={f} className="text-charcoal/50 text-[12px] font-body flex items-center gap-2 whitespace-nowrap">
-                                <span className="w-1 h-1 rounded-full bg-gold/50" /> {f}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex items-end justify-between border-t border-gold/10 pt-6">
-                          <div>
-                            <p className="text-charcoal/40 text-[10px] uppercase font-body mb-1">Price per night</p>
-                            <p className="text-2xl font-display text-gold italic">KSh {room.price.toLocaleString()}</p>
-                          </div>
-                          <button 
-                            className={`px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-body transition-all duration-300
-                              ${selectedRoomId === room.id ? "bg-gold text-white" : "border border-gold text-gold hover:bg-gold hover:text-white"}
-                            `}
-                          >
-                            {selectedRoomId === room.id ? "Selected ✓" : "Select"}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Sidebar Summary */}
-                <div className="lg:col-span-1">
-                  <div className="bg-espresso p-8 sticky top-32">
-                    <h4 className="text-gold text-[11px] uppercase tracking-[0.3em] font-body font-medium mb-8">Reservation Info</h4>
-                    <div className="space-y-6 mb-10">
-                      <div className="flex justify-between border-b border-gold/10 pb-4">
-                        <span className="text-ivory/60 text-[13px] font-body">Check-in</span>
-                        <span className="text-ivory text-[13px] font-body">{formatSummaryDate(checkInDateStr)}</span>
-                      </div>
-                      <div className="flex justify-between border-b border-gold/10 pb-4">
-                        <span className="text-ivory/60 text-[13px] font-body">Check-out</span>
-                        <span className="text-ivory text-[13px] font-body">{formatSummaryDate(checkOutDateStr)}</span>
-                      </div>
-                      <div className="flex justify-between border-b border-gold/10 pb-4">
-                        <span className="text-ivory/60 text-[13px] font-body">Nights</span>
-                        <span className="text-ivory text-[13px] font-body">{nights}</span>
-                      </div>
-                      <div className="flex justify-between border-b border-gold/10 pb-4">
-                        <span className="text-ivory/60 text-[13px] font-body">Guests</span>
-                        <span className="text-ivory text-[13px] font-body">{guests.adults} Adults, {guests.children} Children</span>
-                      </div>
-                      {selectedRoom && (
-                        <div className="flex justify-between border-b border-gold/10 pb-4">
-                          <span className="text-ivory/60 text-[13px] font-body">Room</span>
-                          <span className="text-gold text-[13px] font-body">{selectedRoom.name}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-4 mb-10">
-                      <div className="flex justify-between text-ivory/60 text-[12px] font-body">
-                        <span>Subtotal</span>
-                        <span>KSh {subtotal.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-ivory/60 text-[12px] font-body">
-                        <span>VAT (16%)</span>
-                        <span>KSh {vat.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between items-end pt-4">
-                        <span className="text-gold text-[12px] uppercase tracking-widest font-body">Total</span>
-                        <span className="text-3xl font-display text-gold italic">KSh {total.toLocaleString()}</span>
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={nextStep}
-                      disabled={!selectedRoomId}
-                      className={`w-full py-5 text-[13px] uppercase tracking-[0.2em] font-body transition-all duration-500
-                        ${selectedRoomId ? "bg-gold text-ivory hover:bg-gold-mid shadow-2xl" : "bg-white/10 text-white/30 cursor-not-allowed"}
-                      `}
-                    >
-                      Continue Details →
-                    </button>
-                    <button onClick={() => setStep(1)} className="w-full text-center text-ivory/40 text-[11px] uppercase tracking-widest mt-6 hover:text-gold transition-colors font-body">
-                      Back to Date Selection
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
 
             {/* STEP 3 */}
             {step === 3 && (
