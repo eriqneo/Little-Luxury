@@ -692,7 +692,13 @@ export default function BookingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-md mx-auto">
-                <button className="flex-1 py-4 border border-gold text-gold text-[13px] uppercase tracking-[0.2em] font-body font-medium hover:bg-gold hover:text-ivory transition-all duration-500">
+                <button 
+                  onClick={() => {
+                    setIsSuccess(false);
+                    setStep(2);
+                  }}
+                  className="flex-1 py-4 border border-gold text-gold text-[13px] uppercase tracking-[0.2em] font-body font-medium hover:bg-gold hover:text-ivory transition-all duration-500"
+                >
                   View Booking
                 </button>
                 <Link to="/" className="flex-1 py-4 bg-espresso text-gold text-[13px] uppercase tracking-[0.2em] font-body font-medium hover:bg-black transition-all duration-500">
