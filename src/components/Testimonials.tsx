@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 function TestimonialCard({ t }: { t: Testimonial }) {
   return (
-    <div className="w-[350px] md:w-[450px] flex-shrink-0 px-8 py-12 bg-white border border-gold/10 mx-4">
+    <div className="w-[350px] md:w-[450px] flex-shrink-0 px-8 py-12 bg-white border border-gold/10 mx-4 whitespace-normal">
       <div className="flex gap-1 text-gold text-[16px] mb-6">
         {"★★★★★".split("").map((s, i) => <span key={i}>{s}</span>)}
       </div>

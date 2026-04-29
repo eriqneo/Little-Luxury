@@ -577,16 +577,23 @@ export default function BookingPage() {
 
 
 
-                    <div className="flex items-start gap-4 mb-12">
-                      <input type="checkbox" id="terms" checked={form.agreed} onChange={e => setForm({...form, agreed: e.target.checked})} className="mt-1 accent-gold cursor-pointer" />
-                      <label 
-                        htmlFor="terms" 
-                        className="text-[13px] font-body font-light text-charcoal/60 leading-relaxed cursor-pointer select-none prose-charcoal [&_p]:m-0"
+                    <div className="mb-12 flex flex-col gap-6">
+                      <div 
+                        className="text-[13px] font-body font-light text-charcoal/60 leading-relaxed select-none prose-charcoal [&_p]:mb-2 last:[&_p]:mb-0"
                         {...(settings?.booking_agreement_text?.includes('<') 
                           ? { dangerouslySetInnerHTML: { __html: settings.booking_agreement_text } }
                           : { children: settings?.booking_agreement_text || "I agree to the Little Luxury house rules, cancellation policy, and processing of my personal data for the reservation." }
                         )}
                       />
+                      <div className="flex items-center gap-4">
+                        <input type="checkbox" id="terms" checked={form.agreed} onChange={e => setForm({...form, agreed: e.target.checked})} className="w-6 h-6 md:w-5 md:h-5 shrink-0 accent-gold cursor-pointer" />
+                        <label 
+                          htmlFor="terms" 
+                          className="text-[14px] md:text-[13px] font-body font-medium text-charcoal/80 cursor-pointer select-none"
+                        >
+                          I confirm that I have read and agree to the Little Luxury house rules
+                        </label>
+                      </div>
                     </div>
 
                     {submitError && (
@@ -712,7 +719,7 @@ export default function BookingPage() {
               
               <h2 className="text-charcoal text-5xl md:text-[60px] font-display italic font-light mb-6">Reservation Confirmed!</h2>
               <p className="text-charcoal/60 text-lg font-body font-light mb-12 max-w-lg mx-auto">
-                Thank you for your trust, {form.firstName}. Your booking reference is <span className="text-gold font-semibold">{bookingRef}</span>. Our team will review your request and contact you at {form.email} to confirm within a few hours.
+                Thank you for your trust, {form.firstName}. Your booking reference is <span className="text-gold font-semibold">{bookingRef}</span>. Our team will review your request and contact you at {form.email} to confirm as soon as possible.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-md mx-auto">
