@@ -116,6 +116,16 @@ export default function Navbar({ onTourClick }: { onTourClick?: () => void }) {
           
           <Link 
             to="/booking"
+            onClick={(e) => {
+              if (location.pathname === "/booking") {
+                e.preventDefault();
+                const el = document.getElementById("booking-interface");
+                if (el) {
+                  const y = el.getBoundingClientRect().top + window.scrollY - 120;
+                  window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+              }
+            }}
             className={`px-4 2xl:px-6 py-2 border transition-all duration-700 text-[11px] 2xl:text-[13px] uppercase tracking-[0.1em] font-body font-medium whitespace-nowrap ${
               isScrolled 
                 ? "border-gold text-gold hover:bg-gold hover:text-ivory" 

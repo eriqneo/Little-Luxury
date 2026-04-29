@@ -21,6 +21,7 @@ import ContactPage from "./components/ContactPage";
 import GalleryPage from "./components/GalleryPage";
 import SurveyPage from "./components/SurveyPage";
 import VirtualTourModal from "./components/VirtualTourModal";
+import ScrollToTop from "./components/ScrollToTop";
 import { useState } from "react";
 
 function MainLayout({ children }: { children: React.ReactNode }) {
@@ -90,6 +91,7 @@ function HomePage() {
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <LoadingScreen />
       <StickyBooking />
       <CookieBanner />

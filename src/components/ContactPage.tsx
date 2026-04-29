@@ -253,7 +253,7 @@ export default function ContactPage() {
                           type="submit"
                           className="px-12 py-5 bg-gold text-white text-[13px] uppercase tracking-[0.2em] font-body font-medium hover:bg-gold-mid transition-all shadow-xl flex items-center gap-3"
                         >
-                          Send Message <Send size={16} />
+                          Send via WhatsApp <Send size={16} />
                         </button>
                       </div>
                     </motion.form>
@@ -309,8 +309,8 @@ export default function ContactPage() {
                         <Phone size={16} />
                         <span className="text-[10px] uppercase tracking-widest font-body font-medium">Call Us</span>
                       </div>
-                      <p className="text-charcoal font-body text-[15px] font-light">{phone1}</p>
-                      {phone2 && <p className="text-charcoal font-body text-[15px] font-light">{phone2}</p>}
+                      <a href={`tel:${phone1}`} className="text-charcoal font-body text-[15px] font-light hover:text-gold transition-colors block">{phone1}</a>
+                      {phone2 && <a href={`tel:${phone2}`} className="text-charcoal font-body text-[15px] font-light hover:text-gold transition-colors block">{phone2}</a>}
                     </div>
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-3 text-gold mb-3">

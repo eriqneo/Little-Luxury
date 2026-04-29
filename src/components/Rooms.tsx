@@ -66,10 +66,10 @@ export default function Rooms() {
                       From KSh {room.price.toLocaleString()} <span className="text-[9px] sm:text-[10px] opacity-50 not-italic uppercase tracking-widest ml-1">/ night</span>
                     </div>
                     <Link
-                      to={`/booking`}
+                      to={`/booking?room=${room.id}`}
                       className="inline-block text-gold text-[11px] sm:text-[12px] uppercase tracking-[0.1em] font-body font-medium transition-all group-hover:translate-x-2"
                     >
-                      Book Room →
+                      {room.category === 'Residence' ? 'Book Home →' : 'Book Room →'}
                     </Link>
                   </div>
                 </div>

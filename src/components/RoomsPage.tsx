@@ -153,7 +153,7 @@ export default function RoomsPage() {
                             onClick={() => navigate(`/booking?room=${room.id}`)}
                             className="px-10 py-4 bg-gold text-ivory text-[13px] uppercase tracking-[0.15em] font-body font-medium hover:bg-espresso transition-all duration-500 shadow-lg"
                           >
-                            Book This Room
+                            {room.category === 'Residence' ? 'Book This Home' : 'Book This Room'}
                           </button>
                         </div>
                       </div>

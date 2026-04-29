@@ -18,7 +18,7 @@ export default function Introduction() {
     : "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&q=80";
 
   return (
-    <section id="introduction" className="py-24 md:py-32 bg-ivory overflow-hidden">
+    <section id="experience" className="py-24 md:py-32 bg-ivory overflow-hidden">
       <div className="container mx-auto px-6 md:px-12 max-w-[1300px]">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-center">
           {/* Left Column */}
@@ -30,12 +30,14 @@ export default function Introduction() {
               {headline}
             </h2>
             <div className="space-y-6 mb-10">
-              <p className="text-[#555] text-[15px] font-body font-light leading-[1.9] max-w-[460px]">
-                {p1}
-              </p>
-              <p className="text-[#555] text-[15px] font-body font-light leading-[1.9] max-w-[460px]">
-                {p2}
-              </p>
+              <div 
+                className="text-[#555] text-[15px] font-body font-light leading-[1.9] max-w-[460px] [&_p]:m-0"
+                dangerouslySetInnerHTML={{ __html: p1 }}
+              />
+              <div 
+                className="text-[#555] text-[15px] font-body font-light leading-[1.9] max-w-[460px] [&_p]:m-0"
+                dangerouslySetInnerHTML={{ __html: p2 }}
+              />
             </div>
             <Link
               to="/about"

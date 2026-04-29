@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Check, 
   ChevronLeft, 
@@ -100,6 +100,9 @@ export default function BookingPage() {
     arrivalTime: "14:00", requests: "", agreed: false
   });
 
+  // REFS for navigation
+  const interfaceRef = useRef<HTMLDivElement>(null);
+
   // Handle room pre-selection from URL
   useEffect(() => {
     if (roomParam && rooms.length > 0) {
@@ -110,6 +113,25 @@ export default function BookingPage() {
       }
     }
   }, [roomParam, rooms]);
+
+  // SCROLL TO INTERFACE ON STEP CHANGE OR ROOM SELECTION
+  useEffect(() => {
+    if (step > 1 || selectedRoomId) {
+      const timer = setTimeout(() => {
+        if (interfaceRef.current) {
+          const yOffset = -120; // Offset for fixed navbar
+          const y = interfaceRef.current.getBoundingClientRect().top + window.scrollY + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [step, selectedRoomId]);
+
+  // SCROLL TO TOP ON MOUNT
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const selectedRoom = useMemo(() => rooms.find(r => r.id === selectedRoomId), [rooms, selectedRoomId]);
   
@@ -253,8 +275,8 @@ export default function BookingPage() {
         </div>
       </section>
 
-      {/* Main Flow */}
-      <section className="py-24 px-6 relative z-0">
+        {/* Booking Interface */}
+        <div id="booking-interface" ref={interfaceRef} className="pt-20 pb-32 bg-ivory">
         <StepIndicator currentStep={step} />
 
         <div className="container mx-auto max-w-[1200px]">
@@ -329,7 +351,7 @@ export default function BookingPage() {
                               ${selectedRoomId === room.id ? "bg-gold text-white" : "border border-gold text-gold hover:bg-gold hover:text-white"}
                             `}
                           >
-                            {selectedRoomId === room.id ? "Continue" : "Select"}
+                            {selectedRoomId === room.id ? "Continue" : (room.category === 'Residence' ? 'Book Home' : 'Book Room')}
                           </button>
                         </div>
                       </div>
@@ -345,7 +367,7 @@ export default function BookingPage() {
                       ${selectedRoomId ? "bg-gold text-ivory hover:bg-gold-mid shadow-2xl" : "bg-gold-muted/30 text-gold-muted cursor-not-allowed"}
                     `}
                   >
-                    Select Dates →
+                    {selectedRoom?.category === 'Residence' ? 'Book This Home →' : 'Book This Room →'}
                   </button>
                 </div>
               </motion.div>
@@ -653,7 +675,9 @@ export default function BookingPage() {
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-widest leading-none mb-1">Support Line</p>
-                        <p className="text-[13px] font-body text-gold">{settings?.contact_phone || '+254 700 000 000'}</p>
+                        <a href={`tel:${settings?.contact_phone?.replace(/\s+/g, '') || '+254700000000'}`} className="text-[13px] font-body text-gold hover:text-white transition-colors">
+                          {settings?.contact_phone || '+254 700 000 000'}
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -662,7 +686,7 @@ export default function BookingPage() {
             )}
           </AnimatePresence>
         </div>
-      </section>
+      </div>
 
       {/* Success Overlay */}
       <AnimatePresence>
@@ -694,6 +718,16 @@ export default function BookingPage() {
               <div className="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-md mx-auto">
                 <button 
                   onClick={() => {
+                    setSelectedDates([]);
+                    setForm({
+                      firstName: '',
+                      lastName: '',
+                      email: '',
+                      phone: '',
+                      arrivalTime: "14:00",
+                      requests: '',
+                      agreed: false
+                    });
                     setIsSuccess(false);
                     setStep(2);
                   }}
