@@ -58,15 +58,15 @@ export default function Introduction() {
                   referrerPolicy="no-referrer"
                 />
               )}
-              
-              {/* Floating Stat Card */}
-              <div className="absolute bottom-[-20px] left-[-20px] md:bottom-[-30px] md:left-[-30px] bg-espresso p-6 md:p-8 md:px-10 shadow-2xl z-20">
-                <div className="text-gold font-display font-semibold text-4xl md:text-[42px] leading-tight mb-1">
-                  {statNum}
-                </div>
-                <div className="text-ivory text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-body font-light opacity-80 whitespace-nowrap">
-                  {statText}
-                </div>
+            </div>
+            
+            {/* Floating Stat Card */}
+            <div className="absolute bottom-[-15px] left-[-10px] md:bottom-[-30px] md:left-[-30px] bg-espresso/95 backdrop-blur-md border border-gold/20 p-5 md:p-8 md:px-10 shadow-[0_20px_50px_rgba(0,0,0,0.4)] z-20 rounded-sm">
+              <div className="text-gold font-display font-light text-3xl md:text-[42px] leading-tight mb-1 md:mb-2">
+                {statNum}
+              </div>
+              <div className="text-ivory text-[9px] md:text-[12px] uppercase tracking-[0.25em] font-body font-light opacity-90 whitespace-nowrap">
+                {statText}
               </div>
             </div>
             
