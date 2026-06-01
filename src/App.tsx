@@ -22,9 +22,9 @@ import GalleryPage from "./components/GalleryPage";
 import SurveyPage from "./components/SurveyPage";
 import VirtualTourModal from "./components/VirtualTourModal";
 import ScrollToTop from "./components/ScrollToTop";
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 
-function MainLayout({ children }: { children: React.ReactNode }) {
+function MainLayout({ children }: { children: ReactNode }) {
   const [isTourOpen, setIsTourOpen] = useState(false);
 
   return (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Instagram, Facebook, MessageCircle, MapPin, Phone, Mail, MessageSquare, Share2, Copy, Check, X } from "lucide-react";
+import { Instagram, Facebook, Youtube, MessageCircle, MapPin, Phone, Mail, MessageSquare, Share2, Copy, Check, X } from "lucide-react";
 import Logo from "./Logo";
 import { Link } from "react-router-dom";
 import { useSiteSettings } from "../hooks/useSiteSettings";
@@ -151,6 +151,15 @@ export default function Footer() {
                   <TikTokIcon size={20} strokeWidth={1.5} />
                 </a>
               )}
+              <a 
+                href="https://www.youtube.com/channel/UCFvqVWich9iUb3i5SNLK36Q" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                title="Follow us on YouTube"
+                className="text-ivory/60 hover:text-gold transition-all duration-300 hover:-translate-y-1"
+              >
+                <Youtube size={20} strokeWidth={1.5} />
+              </a>
               {settings?.whatsapp_number && (
                 <a 
                   href={`https://wa.me/${settings.whatsapp_number.replace(/\D/g, '')}`} 
